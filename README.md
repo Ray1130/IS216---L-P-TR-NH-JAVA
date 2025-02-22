@@ -35,7 +35,7 @@
 | STT    | MSSV          | Họ và Tên              | Github                                               | Email                   |
 | ------ |:-------------:| ----------------------:|-----------------------------------------------------:|-------------------------:
 | 1      | 23521124      | Nguyễn Bảo Như     |[Nguyen Bao Nhu](https://github.com/ray1130)            |23521124@gm.uit.edu.vn   |
-| 2      | 23520507      | Trần Ngọc Quỳnh Hoa        |[nhims79](https://github.com/nhims79)     |23520507@gm.uit.edu.vn   |
+| 2      | 23520507      | Trần Ngọc Quỳnh Hoa        |[Trần Ngọc Quỳnh Hoa](https://github.com/nhims79)     |23520507@gm.uit.edu.vn   |
 | 3      | 23520884    | Nguyễn Minh Long      |[Nguyen Minh Long](https://github.com/oolongc2)               |23520884@gm.uit.edu.vn   |
 | 2      | 23521121      | Huỳnh Lâm Tâm Như   |[Huỳnh Lâm Tâm Như](https://github.com/NhuHuynh-252)          |23521121@gm.uit.edu.vn   |
 
