@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký học phần - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        html,
+        body {
+            font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-start;
+            /* Các item menu sẽ bắt đầu từ trái */
+            align-items: center;
+            /* Căn giữa các item theo chiều dọc */
+            background-color: #ffffff;
+            padding: 10px 30px;
+            gap: 20px;
+            /* Khoảng cách giữa các item */
+            border-bottom: 1px solid #ccc;
+            height: 60px;
+            /* Đặt chiều cao cố định cho menu */
+            box-sizing: border-box;
+        }
+
+
+        .tab-btn {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0B5394;
+            background-color: transparent;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: inline-flex;
+            /* Để align-items hoạt động */
+            align-items: center;
+            height: 100%;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active-tab {
+            background-color: #e0f0ff;
+            color: #0056b3;
+        }
+
+
+        .alert-dkhp-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            margin: 15px auto;
+            /* Căn giữa và cách content chính */
+            border-radius: 5px;
+            max-width: 800px;
+            /* Giống .card cho đồng bộ */
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-wrapper {
+            margin-top: 60px;
+            /* Bằng chiều cao của menu */
+            padding: 20px 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+            /* Cho phép cuộn nếu nội dung dài */
+        }
+
+        .card {
+            background-color: #fff;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #004b8d;
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .card ul,
+        .card ol {
+            margin-left: 20px;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
+        .card p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .card p strong {
+            color: #333;
+        }
+
+        h2.page-title {
+            /* Class mới cho tiêu đề trang */
+            color: #100758;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 0;
+            /* Bỏ margin top mặc định của h2 */
+            margin-bottom: 25px;
+            /* Khoảng cách với card đầu tiên */
+        }
+
+
+        .user-dropdown-wrapper {
+            margin-left: auto;
+            position: relative;
+            display: flex;
+            /* Thêm để căn chỉnh trigger bên trong nếu cần */
+            align-items: center;
+            /* Căn chỉnh trigger */
+        }
+
+
+        .user-info-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease-in-out;
+            font-weight: 500;
+            font-size: 16px;
+            color: #000;
+        }
+
+        .user-info-trigger:hover {
+            background-color: #e9ecef;
+            /* Màu nền khi hover */
+        }
+
+        .username-display {
+            margin-right: 8px;
+            /* Khoảng cách giữa tên và icon mũi tên */
+        }
+
+        .user-caret-icon {
+            /* color: #555; Đã có trong user-info-trigger nếu bạn muốn đồng bộ */
+            font-size: 0.9em;
+            /* Kích thước icon mũi tên */
+            transition: transform 0.2s ease-in-out;
+            /* Hiệu ứng xoay mũi tên */
+        }
+
+
+        .dropdown-content-simple {
+            display: none;
+            /* QUAN TRỌNG: Phải ẩn ban đầu */
+            position: absolute;
+            /* QUAN TRỌNG: Để định vị so với cha */
+            background-color: white;
+            min-width: 160px;
+            /* Chiều rộng tối thiểu của dropdown */
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            /* Đảm bảo dropdown nổi lên trên menu (menu có z-index: 1000) */
+            right: 0;
+            /* Căn phải với wrapper */
+            top: calc(100% + 5px);
+            /* Vị trí ngay dưới trigger, có khoảng cách 5px */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            /* Để bo góc hoạt động đúng với button bên trong */
+        }
+
+        /* Nút đăng xuất trong dropdown */
+        .dropdown-item-simple.logout-button-simple {
+            display: block;
+            /* Để chiếm toàn bộ chiều rộng */
+            width: 100%;
+            padding: 10px 15px;
+            text-align: left;
+            /* Căn chữ sang trái */
+            background-color: transparent;
+            border: none;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            /* Kế thừa font từ body/nav */
+        }
+
+        .dropdown-item-simple.logout-button-simple:hover {
+            background-color: #f0f0f0;
+            /* Màu nền khi hover nút */
+            color: #0056b3;
+            /* Màu chữ khi hover nút */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Menu -->
+    <nav class="menu">
+        <a th:href="@{/DKHP/dashboarddkhp}" class="tab-btn">Dashboard</a>
+        <a th:href="@{/DKHP/formdkhp}" class="tab-btn">Đăng Ký Học Phần</a>
+        <a th:href="@{/DKHP/danhsachdkhp}" class="tab-btn">Danh sách Lớp Đã Đăng Ký</a>
+        <div class="user-dropdown-wrapper">
+
+            <!-- Phần kích hoạt dropdown (Tên người dùng và icon mũi tên) -->
+            <div id="userInfoTrigger" class="user-info-trigger">
+                <span th:text="${#authentication.name ?: 'Người dùng'}" class="username-display">Tên Người Dùng</span>
+                <i class="fas fa-caret-down user-caret-icon"></i> <!-- Icon mũi tên xuống, cần Font Awesome -->
+            </div>
+
+            <!-- Nội dung Dropdown -->
+            <div id="userDropdownContent" class="dropdown-content-simple">
+                <form th:action="@{/logout}" method="post" style="margin:0;">
+                    <button type="submit" class="dropdown-item-simple logout-button-simple">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="content-wrapper">
+
+        <div th:if="${errorMessageDkhp}" class="alert-dkhp-error">
+            <p th:text="${errorMessageDkhp}"></p>
+        </div>
+
+
+        <section id="dashboard">
+            <h2 class="page-title">TRANG ĐĂNG KÝ HỌC PHẦN - TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN</h2>
+
+            <div class="card">
+                <h3 class="card-title">HƯỚNG DẪN ĐĂNG KÝ HỌC PHẦN</h3>
+                <ol>
+                    <li>Nhấn vào trình đơn <strong>Đăng ký Học phần</strong>.</li>
+                    <li>Chọn các lớp cần đăng ký từ danh sách hiển thị.</li>
+                    <li>Nhấn vào nút <strong>Đăng ký</strong> ở cuối trang (nếu có).</li>
+                    <li>Chờ hệ thống xử lý và kiểm tra thông báo kết quả.</li>
+                    <li>Sau khi có kết quả, sinh viên có thể kiểm tra danh sách lớp đã đăng ký hoặc đăng ký tiếp.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">MỘT SỐ LỖI THƯỜNG GẶP</h3>
+                <p><strong>1. Không thấy môn học cần đăng ký?</strong></p>
+                <p>Vui lòng kiểm tra lại học kỳ đã chọn (nếu có lựa chọn), hoặc đảm bảo bạn đang trong đúng thời gian
+                    đăng ký. Liên hệ phòng đào tạo nếu vấn đề vẫn tiếp diễn.</p>
+
+                <p><strong>2. Không thấy các lớp dạy bằng Tiếng Anh?</strong></p>
+                <p>Hãy chắc rằng bạn đã thỏa điều kiện về trình độ tiếng Anh theo quy định của nhà trường. Các chứng chỉ
+                    thường được chấp nhận bao gồm:</p>
+                <ul>
+                    <li>TOEIC Listening & Reading (≥ 500) kèm TOEIC Speaking & Writing (≥ 160).</li>
+                    <li>TOEFL iBT ≥ 50.</li>
+                    <li>IELTS Academic ≥ 5.0.</li>
+                    <li>VNU-EPT ≥ 201.</li>
+                    <li>Chứng chỉ Cambridge PET hoặc tương đương.</li>
+                </ul>
+                <p><strong>3. Đăng ký thành công nhưng không hiển thị trong danh sách lớp đã đăng ký?</strong></p>
+                <p>Vui lòng chờ vài phút để hệ thống cập nhật. Bạn cũng có thể thử đăng xuất và đăng nhập lại. Nếu vẫn
+                    không thấy, hãy liên hệ bộ phận hỗ trợ kỹ thuật.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('nav.menu a.tab-btn');
+
+            navLinks.forEach(link => {
+                // Lấy href một cách an toàn
+                const linkHref = link.getAttribute('href') || (link.getAttribute('th:href') ? link.getAttribute('th:href').replace('@{', '').replace('}', '') : null);
+
+                if (linkHref && currentPath.includes(linkHref)) {
+                    link.classList.add('active-tab');
+                } else {
+                    link.classList.remove('active-tab');
+                }
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const trigger = document.getElementById('userInfoTrigger');
+            const dropdownMenu = document.getElementById('userDropdownContent');
+
+            if (trigger && dropdownMenu) {
+                trigger.addEventListener('click', function (event) {
+                    // Ngăn sự kiện click lan ra ngoài, nếu trigger nằm trong phần tử có thể click khác
+                    event.stopPropagation();
+                    // Toggle hiển thị menu
+                    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                });
+
+                // Đóng menu nếu click ra bất kỳ đâu bên ngoài menu và trigger
+                document.addEventListener('click', function (event) {
+                    if (dropdownMenu.style.display === 'block' && !trigger.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                        dropdownMenu.style.display = 'none';
+                    }
+                });
+
+                // (Tùy chọn) Đóng menu khi nhấn phím Escape
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape' && dropdownMenu.style.display === 'block') {
+                        dropdownMenu.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
