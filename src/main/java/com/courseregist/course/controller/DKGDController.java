@@ -1,7 +1,7 @@
 package com.courseregist.course.controller;
 
-import com.courseregist.course.DTO.LichDangKyDTO; // NEW for /danhsachdkgd
-import com.courseregist.course.entity.LichDay; // for danh sách lịch dạy hiển thị
+import com.courseregist.course.DTO.LichDangKyDTO; 
+import com.courseregist.course.entity.LichDay; 
 import com.courseregist.course.entity.MonHoc;
 import com.courseregist.course.service.DKGDService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.awt.font.ImageGraphicAttribute;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.LinkedHashMap; // for GiangVien DANGKY_MONDAY
+import java.util.LinkedHashMap; 
 import java.util.List;
 import java.util.Map;
 
@@ -31,15 +31,11 @@ public class DKGDController {
         this.dkgdService = dkgdService;
     }
 
-    // Điều hướng đến dashboard đăng ký giảng dạy (/lecturer/dashboardkgd)
     @GetMapping("/dashboarddkgd")
     public String showDashboardDKGD() {
         return "dashboarddkgd";
     }
 
-    // Điều hướng đến trang đăng ký môn dạy (/lecturer/dangkymonday)
-    // Trong mỗi Controller không được có GetMapping trùng nhau
-    // Lấy danh sách môn học từ database môn học (nhờ vào DKGDService)
     @GetMapping("/dangkymonday")
     public String showMonHocPage(@RequestParam(name = "maMH", required = false) String maMH,
                                  @RequestParam(name = "tenMH", required = false) String tenMH,
@@ -47,10 +43,10 @@ public class DKGDController {
         List<MonHoc> danhSach;
 
         if ((maMH != null && !maMH.isEmpty()) || (tenMH != null && !tenMH.isEmpty())) {
-            danhSach = dkgdService.searchMonHoc(maMH, tenMH); // Gọi hàm tìm kiếm
-            model.addAttribute("isSearch", true); // Để biết đang ở trạng thái tìm kiếm
+            danhSach = dkgdService.searchMonHoc(maMH, tenMH); 
+            model.addAttribute("isSearch", true);
         } else {
-            danhSach = dkgdService.getDanhSachMH(); // Lấy toàn bộ danh sách
+            danhSach = dkgdService.getDanhSachMH(); 
             model.addAttribute("isSearch", false);
         }
 
@@ -58,7 +54,6 @@ public class DKGDController {
         return "dangkymonday";
     }
 
-    // Điều hướng giảng viên đăng ký thành công sau khi nhấn nút Xác nhận
     @PostMapping("/luuphieudangky")
     public String dangKyMonDay(Authentication authentication,
                                //@RequestParam String maHK,
@@ -70,7 +65,7 @@ public class DKGDController {
 
         System.out.println("CONTROLLER - MaGV: " + maGV);
         System.out.println("CONTROLLER - MaHK: " + maHK);
-        System.out.println("CONTROLLER - Danh sách MaMH GV đăng ký: " + maMHList); // do để mã MH CHAR(10) nên trống khi in ra ở Terminal
+        System.out.println("CONTROLLER - Danh sách MaMH GV đăng ký: " + maMHList);
 
         Map<String, String> ketQua = new LinkedHashMap<>();
 
@@ -93,20 +88,17 @@ public class DKGDController {
                     ketQua.put(maMH, "Lỗi không xác định");
             }
         }
-        // Hiển thị thông báo đăng ký thành công
         redirectAttributes.addFlashAttribute("ketQuaDangKy", ketQua);
 
         return "redirect:/lecturer/dangkymonday";
     }
 
 
-    // Điều hướng đến trang đăng ký lịch dạy (/lecturer/dangkylichday)
     @GetMapping("/dangkylichday")
     public String showDangKyLichDayPage() {
         return "dangkylichday";
     }
 
-    // Lưu thông tin đăng ký thời gian dạy
     @PostMapping("/luulichday")
     public String dangKyLichDay(Authentication authentication,
                                 @RequestParam List<String> danhSachLichDay,
@@ -138,7 +130,6 @@ public class DKGDController {
     }
 
 
-    // Điều hướng đến trang danh sách đăng ký giảng dạy (/lecturer/danhsachdkgd)
     @GetMapping("/danhsachdkgd")
     public String showDanhSachDKGD(Model model, Authentication authentication) {
 
@@ -164,7 +155,6 @@ public class DKGDController {
         return "danhsachdkgd";
     }
 
-    // Xoa mon hoc da dang ky cua giang vien
     @PostMapping("/delete/{maMH}")
     public String xoaMonHoc(@PathVariable("maMH") String maMH,
                             RedirectAttributes redirectAttributes) {
@@ -176,10 +166,9 @@ public class DKGDController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Xóa môn học thất bại!");
         }
-        return "redirect:/lecturer/danhsachdkgd"; // chuyển về trang danh sách dang ky giang day
+        return "redirect:/lecturer/danhsachdkgd";
     }
 
-    // Xoa lich day da dang ky cua giang vien
     @PostMapping("/xoaTiet/{thu}")
     public String xoaTiet(@PathVariable("thu") String thu,
                           Authentication authentication,
@@ -201,11 +190,5 @@ public class DKGDController {
 
         return "redirect:/lecturer/danhsachdkgd";
     }
-
-
-    // Điều hướng đến trang danh sách lớp dạy được phân công (/lecturer/danhsachphancong)
-    // Trang này để phòng đào tạo tự sắp xếp thủ công sau đó cập nhật lên hệ thống chứ không thao tác trên trang này
-    @GetMapping("/danhsachphancong")
-    public String showDanhSachPhanCong() { return "danhsachphancong"; }
 
 }
