@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mở/Đóng Đăng ký học phần</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #1e396f;
+      color: #ecf0f1;
+      height: 100vh;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin-bottom: 5px;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: #ecf0f1;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      background-color: #264e9d;
+      color: #ffffff;
+    }
+
+    .sidebar .fas,
+    .sidebar .fa-solid {
+      margin-right: 12px;
+      font-size: 18px;
+      color: #eeeff3;
+    }
+
+    .sidebar .sidebar-logout-button {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 20px;
+      background-color: transparent;
+      border: none;
+      color: #ecf0f1;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .sidebar .sidebar-logout-button:hover {
+      background-color: #264e9d;
+      color: #ffffff;
+    }
+
+    .sidebar .sidebar-logout-button .fas {
+      margin-right: 12px;
+      font-size: 18px;
+      color: #eeeff3;
+    }
+
+    .content {
+      margin-left: 250px;
+      padding: 40px;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    form#registrationForm {
+      background-color: #fff;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+
+    form#registrationForm label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    form#registrationForm input[type="text"],
+    form#registrationForm input[type="datetime-local"] {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    form#registrationForm input[type="checkbox"] {
+      margin-top: 10px;
+    }
+
+    form#registrationForm button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    form#registrationForm button:hover {
+      background-color: #0056b3;
+    }
+            .sidebar .submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: #043862;
+            display: none;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .sidebar .submenu li {
+            margin-bottom: 0;
+        }
+
+        .sidebar .submenu a {
+            padding: 10px 20px 10px 50px;
+            font-size: 15px;
+            color: #bdc3c7;
+            position: relative;
+        }
+
+        .sidebar .submenu a:hover {
+            background-color: #234a6e;
+            color: #ffffff;
+        }
+
+    .sidebar .submenu a::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 15px;
+            width: 2px;
+            background-color: #1a87a8;
+            border-radius: 1px;
+    }
+    .dropdown-arrow {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+    color: #bdc3c7;
+    }
+
+  .sidebar .menu-item .parent-link .dropdown-arrow i {
+      font-size: 10px !important;
+  }
+
+  .has-submenu.active .dropdown-arrow {
+      transform: rotate(90deg);
+  }
+
+  .has-submenu.active > .parent-link {
+      background-color: #1e396f;
+      color: #ffffff;
+  }
+
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <!-- Nội dung Sidebar của bạn -->
+  <ul>
+    <li class="menu-item">
+      <a href="/admin">
+        <i class="fas fa-home"></i>
+        <span>Admin panel</span>
+      </a>
+    </li>
+    <li class="menu-item has-submenu">
+      <a href="/admin/sinhvien" class="parent-link">
+        <i class="fas fa-user-graduate"></i>
+        Quản lý sinh viên
+        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+      </a>
+      <ul class="submenu">
+        <li><a href="/admin/themsinhvien">Thêm sinh viên</a></li>
+        <li><a href="/admin/sinhvien">Thông tin sinh viên</a></li>
+      </ul>
+
+    </li>
+    <li class="menu-item has-submenu">
+      <a href="/admin/giangvien" class="parent-link">
+        <i class="fas fa-chalkboard-teacher"></i>
+        Quản lý giảng viên
+        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+      </a>
+      <ul class="submenu">
+        <li><a href="/admin/themgiangvien">Thêm giảng viên</a></li>
+        <li><a href="/admin/giangvien">Thông tin giảng viên</a></li>
+      </ul>
+    </li>
+    <li class="menu-item has-submenu">
+      <a href="/admin/monhoc" class="parent-link">
+        <i class="fas fa-book"></i>
+        Quản lý môn học
+        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+      </a>
+      <ul class="submenu">
+        <li><a href="/admin/themmonhoc">Thêm môn học</a></li>
+        <li><a href="/admin/monhoc">Thông tin môn học</a></li>
+      </ul>
+    </li>
+    <li class="menu-item has-submenu">
+      <a href="/lophoc" class="parent-link">
+        <i class="fas fa-school"></i>
+        <span>Quản lý lớp học</span>
+        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+      </a>
+      <ul class="submenu">
+        <li><a href="/admin/themlophoc">Thêm lớp học</a></li>
+        <li><a href="/admin/lophoc">Thông tin lớp học</a></li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="/admin/motrangdkhp">
+        <i class="fas fa-calendar-check"></i> <!-- Đã thêm biểu tượng -->
+        Mở/Đóng Đăng ký học phần
+      </a>
+    </li>
+    <li class="menu-item">
+      <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+        <button type="submit" class="sidebar-logout-button">
+          <i class="fas fa-sign-out-alt"></i>
+          Đăng xuất
+        </button>
+      </form>
+    </li>
+  </ul>
+</div>
+
+<div class="content">
+  <form id="registrationForm">
+    <label>Mã học kỳ:</label>
+    <input type="text" name="maHK" required>
+
+    <label>Ngày bắt đầu:</label>
+    <input type="datetime-local" id="startDate" required>
+
+    <label>Ngày kết thúc:</label>
+    <input type="datetime-local" id="endDate" required>
+
+    <label>
+      <input type="checkbox" id="enable"> Mở đăng ký
+    </label>
+
+    <button type="button" onclick="moDKHP()">Lưu</button>
+  </form>
+</div>
+
+<script>
+  function moDKHP() {
+    let maHK = document.querySelector('input[name="maHK"]').value;
+    let startDate = document.getElementById('startDate').value;
+    let endDate = document.getElementById('endDate').value;
+    let enable = document.getElementById('enable').checked;
+
+    fetch('/admin/motrangdkhp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `maHK=${maHK}&start=${startDate}&end=${endDate}&enable=${enable}`
+    })
+    .then(response => response.text())
+    .then(data => alert(data))
+    .catch(error => console.error('Lỗi:', error));
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Xử lý menu dropdown
+    const submenuParents = document.querySelectorAll('.has-submenu .parent-link');
+    submenuParents.forEach(function (parentLink) {
+      parentLink.addEventListener('click', function (event) {
+        event.preventDefault();
+        const parentLi = this.closest('.has-submenu');
+        const submenu = parentLi.querySelector('.submenu');
+        parentLi.classList.toggle('active');
+
+        if (submenu.style.display === 'block') {
+          submenu.style.maxHeight = '0';
+          submenu.style.opacity = '0';
+          setTimeout(() => {
+            submenu.style.display = 'none';
+          }, 300);
+        } else {
+          submenu.style.display = 'block';
+          requestAnimationFrame(() => {
+            submenu.style.maxHeight = submenu.scrollHeight + 'px';
+            submenu.style.opacity = '1';
+          });
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
