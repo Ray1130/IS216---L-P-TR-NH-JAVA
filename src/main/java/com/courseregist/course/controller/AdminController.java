@@ -525,6 +525,106 @@ public class AdminController {
         return "admin/sinhvien";
     }
 
+    /** QUẢN LÝ GIẢNG VIÊN **/
+    @Autowired
+    private GiangVienRepository gvRepository;
+
+    @GetMapping("/giangvien")
+    public String showGiangVienPage(@RequestParam(name = "maGV", required = false) String maGV,
+                                    @RequestParam(name = "hoTenGV", required = false) String hoTenGV,
+                                    Model model) {
+        List<GiangVien> danhSach;
+        if ((maGV != null && !maGV.isEmpty()) || (hoTenGV != null && !hoTenGV.isEmpty())) {
+            danhSach = adminService.searchGiangVien(maGV, hoTenGV);
+            model.addAttribute("isSearch", true);
+        } else {
+            danhSach = adminService.getDanhSachGiangVien();
+            model.addAttribute("isSearch", false);
+        }
+        model.addAttribute("giangVienList", danhSach);
+        return "giangvien";
+    }
+
+    @GetMapping("/themgiangvien")
+    public String showThemGiangVienForm(Model model) {
+        model.addAttribute("giangVien", new GiangVien());
+        return "themgiangvien";
+    }
+
+    @PostMapping("/themgiangvien")
+    public String addGiangVien(@Valid @ModelAttribute("giangVien") GiangVien giangVien, BindingResult result,
+                               RedirectAttributes redirectAttributes, Model model) {
+        if (result.hasErrors()) {
+            return "themgiangvien";
+        }
+
+        System.out.println("Đã nhận từ form: " + giangVien.getMaGV());
+
+        boolean isAdded = adminService.addGiangVien(giangVien);
+
+        if (isAdded) {
+            redirectAttributes.addFlashAttribute("message", "Thêm giảng viên thành công!");
+        } else {
+            model.addAttribute("error", "Mã giảng viên đã tồn tại!");
+            model.addAttribute("giangVien", giangVien);
+            return "themgiangvien";
+        }
+        return "redirect:/admin/giangvien";
+    }
+
+    @PostMapping("/deleteGV/{maGV}")
+    public String xoaGiangVien(@ModelAttribute GiangVien giangVien, RedirectAttributes redirectAttributes) {
+        System.out.println("Đã nhận từ form: " + giangVien.getMaGV());
+        try {
+            adminService.deleteGiangVien(giangVien);
+            redirectAttributes.addFlashAttribute("message", "Xóa giảng viên thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Xóa giảng viên thất bại!");
+        }
+        return "redirect:/admin/giangvien";
+    }
+
+    @GetMapping("/giangvien/suagiangvien/{maGV}")
+    public String showEditGiangVienForm(@PathVariable String maGV, Model model) {
+        GiangVien gv = adminService.findGVById(maGV);
+        if (gv == null) {
+            return "redirect:/admin/giangvien?error=notfound";
+        } else {
+            model.addAttribute("giangVien", gv);
+            return "suagiangvien";
+        }
+    }
+
+    @PostMapping("/giangvien/suagiangvien/{maGV}")
+    public String updateGiangVien(@Valid @ModelAttribute("giangVien") GiangVien giangVien, BindingResult result,
+                                  RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "suagiangvien";
+        }
+        boolean updated = adminService.updateGiangVien(giangVien);
+        if (updated) {
+            redirectAttributes.addFlashAttribute("msg", "Cập nhật giảng viên thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Cập nhật thất bại!");
+        }
+        return "redirect:/admin/giangvien";
+    }
+
+    @PutMapping("/giangvien/suagiangvien/{maGV}")
+    public ResponseEntity<Boolean> updateGiangVien(@PathVariable String maGV, @RequestBody GiangVien giangVien) {
+        return ResponseEntity.ok(adminService.updateGiangVien(giangVien));
+    }
+
+    @GetMapping("/giangvien/search")
+    public String searchGiangVien(
+            @RequestParam(required = false) String maGV,
+            @RequestParam(required = false) String hoTenGV,
+            Model model) {
+        List<GiangVien> ketQua = adminService.searchGiangVien(maGV, hoTenGV);
+        model.addAttribute("danhSachGiangVien", ketQua);
+        return "admin/giangvien";
+    }
+
 }
 
 
