@@ -123,4 +123,45 @@ public class AdminService {
         return svRepository.searchSinhVien(maSVTrimmed, hoTenSVTrimmed);
     }
 
+    /** QUẢN LÝ GIẢNG VIÊN **/
+
+    @Autowired
+    private GiangVienRepository gvRepository;
+
+    public List<GiangVien> getDanhSachGiangVien() {
+        return gvRepository.getDanhSachGiangVien();
+    }
+
+    public boolean addGiangVien(GiangVien giangVien) {
+        if (giangVien.getMaGV() == null || giangVien.getMaGV().isEmpty()) {
+            return false;
+        }
+        return gvRepository.addGiangVien(giangVien);
+    }
+
+    public boolean deleteGiangVien(GiangVien giangVien) {
+        if (giangVien.getMaGV() == null || giangVien.getMaGV().isEmpty()) {
+            return false;
+        }
+        return gvRepository.deleteGiangVien(giangVien);
+    }
+
+    public boolean updateGiangVien(GiangVien giangVien) {
+        return gvRepository.updateGiangVien(giangVien);
+    }
+
+    public GiangVien findGVById(String maGV) {
+        return gvRepository.findGVById(maGV);
+    }
+
+    // Tìm giảng viên theo mã hoặc họ tên (gộp họ + tên thành 1 trường tìm kiếm)
+    public List<GiangVien> searchGiangVien(String maGV, String hoTenGV) {
+        String maGVTrimmed = (maGV != null) ? maGV.trim() : "";
+        String hoTenGVTrimmed = (hoTenGV != null) ? hoTenGV.trim() : "";
+
+        if (maGVTrimmed.isEmpty() && hoTenGVTrimmed.isEmpty()) {
+            return gvRepository.getDanhSachGiangVien();
+        }
+        return gvRepository.searchGiangVien(maGVTrimmed, hoTenGVTrimmed);
+    }
 }
