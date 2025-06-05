@@ -418,4 +418,132 @@ public class AdminController {
         }
     }
 
+     @Autowired
+    private SinhVienRepository svRepo;
+    
+    // lấy sinh viên từ dtb
+    @GetMapping("/sinhvien")
+    public String showSinhVienPage(@RequestParam(name = "maSV", required = false) String maSV,
+            @RequestParam(name = "hoTenSV", required = false) String hoTenSV,
+            Model model) {
+
+        List<SinhVien> danhSach;
+        if ((maSV != null && !maSV.isEmpty()) || (hoTenSV != null && !hoTenSV.isEmpty())) {
+            danhSach = adminService.searchSinhVien(maSV, hoTenSV); // Gọi hàm tìm kiếm
+            model.addAttribute("isSearch", true); // Để biết đang ở trạng thái tìm kiếm
+        } else {
+            danhSach = adminService.getDanhSachSV(); // Lấy toàn bộ danh sách
+            model.addAttribute("isSearch", false);
+        }
+        model.addAttribute("sinhVienList", danhSach);
+        return "sinhvien";
+    }
+     
+    @GetMapping("/themsinhvien")
+    public String showThemSinhVienForm(Model model) {
+        SinhVien sinhVien = new SinhVien(); // tạo form trống
+        sinhVien.setTinhTrang("Đang học");
+        model.addAttribute("sinhVien", sinhVien);
+        return "themsinhvien"; 
+    }
+    // Thêm sinh viên mới
+    @PostMapping("/themsinhvien")
+    public String addSinhVien(@Valid @ModelAttribute("sinhVien") SinhVien sinhVien, BindingResult result,
+            RedirectAttributes redirectAttributes, Model model) {
+        if (result.hasErrors()) {
+            result.getFieldErrors().forEach(error -> {
+                System.err
+                        .println("Lỗi validation tại trường '" + error.getField() + "': " + error.getDefaultMessage());
+            });
+            // Nếu có lỗi validation, trả về lại form để hiển thị lỗi
+            return "themsinhvien";
+        }
+        System.out.println("Đã nhận từ form: " + sinhVien.getMaSV());
+        boolean success = adminService.addSinhVien(sinhVien);
+        if (success) {
+            redirectAttributes.addFlashAttribute("message", "Thêm sinh viên thành công!");
+        } else {
+           
+            model.addAttribute("error", "Mã sinh viên đã tồn tại!");
+            model.addAttribute("sinhVien", sinhVien); // Đưa lại dữ liệu vào model
+            return "themsinhvien"; // Trả về lại trang themsinhvien
+        }
+        return "redirect:/admin/sinhvien"; // Chuyển về trang danh sách
+    }
+    // Xóa sinh viên
+    @PostMapping("/sinhvien/delete/{MaSV}")
+    public String xoaSinhVien(@ModelAttribute SinhVien sinhVien, RedirectAttributes redirectAttributes) {
+        System.out.println("Đã nhận từ form: " + sinhVien.getMaSV());
+        try {
+            adminService.deleteSinhVien(sinhVien);
+            redirectAttributes.addFlashAttribute("message", "Xóa sinh viên thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Xóa sinh viên thất bại!");
+        }
+        return "redirect:/admin/sinhvien"; 
+    }
+
+    // Sửa thông tin sinh viên
+    @PutMapping("/sinhvien/suasinhvien/{maSV}")
+    public ResponseEntity<Boolean> updateSinhVien(@PathVariable String maSV, @RequestBody SinhVien sinhVien) {
+        return ResponseEntity.ok(adminService.updateSinhVien(sinhVien));
+    }
+
+    // Hiển thị form sửa thông tin sinh viên
+    @GetMapping("/sinhvien/suasinhvien/{maSV}")
+    public String showEditSinhVienForm(@PathVariable String maSV, Model model) {
+        SinhVien sinhVien = adminService.findByIdSV(maSV); 
+        if (sinhVien == null) {
+            return "redirect:/admin/sinhvien?error=notfound";
+        } else {
+            model.addAttribute("sinhVien", sinhVien);
+            return "suasinhvien"; 
+        }
+    }
+    // Cập nhật thông tin sinh viên
+    @PostMapping("/sinhvien/suasinhvien/{maSV}")
+    public String updateSinhVien(@Valid @ModelAttribute("sinhVien") SinhVien sinhVien, BindingResult result,
+            RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "suasinhvien";
+        }
+        boolean updated = adminService.updateSinhVien(sinhVien);
+        if (updated) {
+            redirectAttributes.addFlashAttribute("msg", "Cập nhật thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("dmm", "Cập nhật thất bại!");
+        }
+        return "redirect:/admin/sinhvien";
+    }
+    // Tìm kiếm sinh viên
+    @GetMapping("/sinhvien/search")
+    public String searchSinhVien(@RequestParam(required = false) String maSV,
+            @RequestParam(required = false) String hoTenSV,
+            Model model) {
+        List<GiangVien> ketQua = adminService.searchGiangVien(maSV, hoTenSV);
+        model.addAttribute("danhSachSinhVien", ketQua);
+        return "admin/sinhvien";
+    }
+
 }
+
+
+    
+
+    
+    
+
+    
+
+            
+
+    
+    
+        
+        
+
+    
+
+    
+
+    
