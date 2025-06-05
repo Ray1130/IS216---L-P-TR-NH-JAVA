@@ -105,4 +105,13 @@ public class AdminDashBoardRepository {
         return jdbcTemplate.queryForList(sql);
     }
 
+    public List<Map<String, Object>> theoDoiSoLuotDKTheoNgay() {
+        String sql = "SELECT TRUNC(ThoiGianDK) AS ngay_dang_ky_lop, " +
+                "COUNT(MaLop) AS so_luot_duoc_dang_ky " +
+                "FROM CHITIETDK " +
+                "GROUP BY TRUNC(ThoiGianDK)  ORDER BY ngay_dang_ky_lop";
+
+        return jdbcTemplate.queryForList(sql);
+    }
+
 }
