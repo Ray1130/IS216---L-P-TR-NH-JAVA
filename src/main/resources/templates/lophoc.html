@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý lớp học</title>
+    <!-- Dùng để chèn các biểu tượng -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <style>
+        html,
+        body {
+            font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Thanh menu */
+        .menu {
+            position: fixed;
+            top: 0;
+            left: 290px;
+            right: 0;
+            z-index: 1000;
+            background-color: #f3f4f6;
+            padding: 15px 30px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu button {
+            font-size: 17px;
+            font-weight: bold;
+            color: #0B5394;
+            background-color: transparent;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu button:hover {
+            background-color: #ADD8E6;
+        }
+
+        /* Thanh tìm kiếm */
+        .search-bar {
+            top: 90px;
+            left: 250px;
+            right: 0;
+            z-index: 9;
+            display: flex;
+            justify-content: center;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 8px 0px;
+            gap: 15px;
+            background-color: transparent;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 0px;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon input {
+            padding: 6px 40px 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-icon i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+        }
+
+        .search-bar input {
+            width: 300px;
+            height: 20px;
+            padding: 8px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #ffffff;
+        }
+
+        .search-bar button {
+            background-color: #32548e;
+            color: #e8edf3;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            min-width: 100px;
+            /*margin-left: 100px;*/
+            cursor: pointer;
+        }
+
+        .search-bar button:hover {
+            background-color: #3d5fab;
+        }
+
+        .table-container {
+            max-height: 700px;
+            overflow-y: auto;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* Bảng table */
+        table {
+            width: 100%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: white;
+            font-size: 14px;
+            border-radius: 8px;
+            overflow: hidden;
+            /*min-width: 1200px;*/
+        }
+
+        th,
+        td {
+            padding: 13px 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        /* Căn trái cho các cột cụ thể */
+        td:nth-child(12) {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #4b72a4;
+            color: #f3f4f6;
+            font-weight: bold;
+            font-size: 16px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-clip: padding-box;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .content {
+            margin-top: 90px;
+            margin-bottom: 30px;
+            padding: 0 70px;
+            display: block;
+            flex-direction: column;
+            position: relative;
+            margin-left: 250px;
+        }
+
+        .registered-table {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding: 0 30px;
+            display: block;
+            flex-direction: column;
+            position: relative;
+
+
+        }
+
+
+        .search-btn {
+            background-color: #ef2e15;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            background-color: #73b3f7;
+        }
+
+        .btn-remove {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-edit {
+            background-color: #6990c8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.2s;
+        }
+
+        .btn-edit:hover {
+            background-color: #87a8d2;
+        }
+
+        .dashboard {
+            margin-top: 80px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background-color: #ADD8E6;
+            /* màu xanh như bạn đang dùng */
+            color: white;
+        }
+
+
+
+        .add-btn {
+            background-color: #5989bd;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background-color: #65a2e3;
+        }
+
+        .alert {
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+
+        
+        .sidebar {
+            width: 250px;
+            background-color: #1e396f;
+            color: #ecf0f1;
+            height: 100vh;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+
+        .sidebar li {
+            margin-bottom: 5px;
+        }
+
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+
+        .sidebar a:hover {
+            background-color: #264e9d;
+            color: #ffffff;
+        }
+
+
+        .sidebar .fas,
+        .sidebar .fa-solid {
+            margin-right: 12px;
+            font-size: 18px;
+            color: #eeeff3;
+        }
+
+
+        .sidebar .submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: #043862;
+            display: none;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+
+        .sidebar .submenu li {
+            margin-bottom: 0;
+        }
+
+
+        .sidebar .submenu a {
+            padding: 10px 20px 10px 50px;
+            font-size: 15px;
+            color: #bdc3c7;
+            position: relative;
+        }
+
+
+        .sidebar .submenu a:hover {
+            background-color: #234a6e;
+            color: #ffffff;
+        }
+
+
+        .sidebar .submenu a::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 15px;
+            width: 2px;
+            background-color: #1a87a8;
+            border-radius: 1px;
+        }
+
+
+        .dropdown-arrow {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+            color: #bdc3c7;
+        }
+
+
+        .sidebar .menu-item .parent-link .dropdown-arrow i {
+            font-size: 10px !important;
+        }
+
+
+        .has-submenu.active .dropdown-arrow {
+            transform: rotate(90deg);
+        }
+
+
+        .has-submenu.active>.parent-link {
+            background-color: #1e396f;
+            /* Giữ màu nền khi active */
+            color: #ffffff;
+        }
+
+        .has-submenu.active>.parent-link:hover {
+            background-color: #1e396f;
+            /* Giữ màu nền khi hover */
+            color: #ffffff;
+        }
+                /* ... (CSS hiện tại của bạn) ... */
+
+        .sidebar .sidebar-logout-button {
+            display: flex; /* Để căn chỉnh biểu tượng và văn bản giống như các thẻ <a> khác */
+            align-items: center;
+            width: 100%; /* Làm cho nút chiếm toàn bộ chiều rộng của li */
+            padding: 12px 20px; /* Giống padding của <a> */
+            background-color: transparent; /* Xóa nền mặc định của nút */
+            border: none; /* Xóa viền mặc định của nút */
+            color: #ecf0f1; /* Giống màu chữ của <a> */
+            text-decoration: none; /* Xóa gạch chân nếu có */
+            font-size: 16px; /* Giống font-size của <a> */
+            font-weight: bold; /* Giống font-weight của <a> */
+            text-align: left; /* Căn chữ sang trái */
+            cursor: pointer; /* Con trỏ tiêu chuẩn cho nút */
+            font-family: 'Segoe UI', sans-serif; /* Đảm bảo font nhất quán */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Giống transition của <a> */
+        }
+
+        .sidebar .sidebar-logout-button:hover {
+            background-color: #264e9d; /* Giống nền hover của <a> */
+            color: #ffffff; /* Giống màu chữ hover của <a> */
+        }
+
+        /* Kiểu cho biểu tượng bên trong nút đăng xuất (nếu bạn thêm) */
+        .sidebar .sidebar-logout-button .fas,
+        .sidebar .sidebar-logout-button .fa-solid {
+            margin-right: 12px; /* Giống margin của biểu tượng khác */
+            font-size: 18px; /* Giống kích thước biểu tượng khác */
+            color: #eeeff3; /* Giống màu biểu tượng khác */
+        }
+
+        /* Đảm bảo form bên trong li không thêm khoảng trống thừa nếu chưa được xử lý */
+        .sidebar li form {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <div class="sidebar">
+        <!-- Nội dung Sidebar của bạn -->
+        <ul>
+            <li class="menu-item">
+                <a href="/admin">
+                    <i class="fas fa-home"></i>
+                    <span>Admin panel</span>
+                </a>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/sinhvien" class="parent-link">
+                    <i class="fas fa-user-graduate"></i>
+                    Quản lý sinh viên
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themsinhvien">Thêm sinh viên</a></li>
+                    <li><a href="/admin/sinhvien">Thông tin sinh viên</a></li>
+                </ul>
+
+
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/giangvien" class="parent-link">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Quản lý giảng viên
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themgiangvien">Thêm giảng viên</a></li>
+                    <li><a href="/admin/giangvien">Thông tin giảng viên</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/monhoc" class="parent-link">
+                    <i class="fas fa-book"></i>
+                    Quản lý môn học
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themmonhoc">Thêm môn học</a></li>
+                    <li><a href="/admin/monhoc">Thông tin môn học</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/lophoc" class="parent-link">
+                    <i class="fas fa-school"></i>
+                    <span>Quản lý lớp học</span>
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themlophoc">Thêm lớp học</a></li>
+                    <li><a href="/admin/lophoc">Thông tin lớp học</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="/admin/motrangdkhp">
+                    <i class="fas fa-calendar-check"></i> 
+                    Mở/Đóng Đăng ký học phần
+                </a>
+            </li>
+            <li class="menu-item">
+                <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                    <button type="submit" class="sidebar-logout-button">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </form>
+        </ul>
+    </div>
+    <!-- Menu 
+    <div class="menu">
+        <button onclick="window.location.href='/admin/themlophoc'" class="add-btn">Thêm lớp học</button>
+    </div>-->
+
+
+    <!-- Content -->
+    <div class="content">
+        <!-- Thông báo thành công -->
+        <div th:if="${message}" class="alert"
+            style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>
+            <span th:text="${message}"></span>
+        </div>
+        <!-- Thông báo thất bại -->
+        <div th:if="${error}" class="alert"
+            style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+            <i class="fa-solid fa-circle-xmark" style="margin-right: 8px;"></i>
+            <span th:text="${error}"></span>
+        </div>
+        <!-- Thông báo cập nhật thành công -->
+        <div th:if="${msg}" class="alert" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>
+            <span th:text="${msg}"></span>
+        </div>
+        <!-- Thông báo cập nhật thất bại -->
+        <div th:if="${dmm}" class="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+            <i class="fa-solid fa-circle-xmark" style="margin-right: 8px;"></i>
+            <span th:text="${dmm}"></span>
+        </div>
+
+        <!-- Search bar -->
+        <form class="search-bar" method="get" th:action="@{/admin/lophoc}">
+            <div class="input-icon">
+                <input type="text" name="maLop" placeholder="Mã lớp học" th:value="${maLop}">
+                <i class="fa fa-search"></i>
+            </div>
+            <div class="input-icon">
+                <input type="text" name="tenMH" placeholder="Tên môn học" th:value="${tenMH}">
+                <i class="fa fa-search"></i>
+            </div>
+
+            <button type="submit" class="search-btn">Tìm kiếm</button>
+            <a th:href="@{/admin/lophoc}" class="search-btn" style="background-color: gray; text-decoration: none;">Hiển
+                thị tất cả</a>
+        </form>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã lớp</th>
+                        <th>Môn học</th>
+                        <th>Số TC</th>
+                        <th>Giảng viên</th>
+                        <th>Mô tả</th>
+                        <th>Sĩ số</th>
+                        <th>Hủy</th>
+                        <th>Chỉnh sửa</th>
+                        <th>Danh sách</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="hp : ${lopHocList}" th:data-ma-lop="${hp.MaLop}" th:data-ma-mh="${hp.MaMH}"
+                        th:data-ten-mh="${hp.TenMH}" th:data-so-tin-chi="${hp.SoTinChi}" th:data-ho-gv="${hp.HoGV}"
+                        th:data-ten-gv="${hp.TenGV}" th:data-thu-ngay-hoc="${hp.ThuNgayHoc}"
+                        th:data-tiet-hoc="${hp.TietHoc}" th:data-cach-tuan="${hp.CachTuan}" th:data-mahk="${hp.MaHK}"
+                        th:data-phongohc="${hp.PhongHoc}" th:data-ngay-bat-dau="${hp.NgayBatDau}"
+                        th:data-ngay-ket-thuc="${hp.NgayKetThuc}" th:data-si-so="${hp.SiSo}">
+                        <td th:text="${hp.MaLop}"></td>
+                        <td th:text="${hp.MaMH + ' - ' + hp.TenMH}"></td>
+                        <td th:text="${hp.SoTinChi}"></td>
+                        <td th:text="${hp.HoGV + '  ' + hp.TenGV}"></td>
+                        <td
+                            th:text="${'Thứ '+ hp.ThuNgayHoc + ', Tiết ' + hp.TietHoc + ', Cách ' + hp.CachTuan + ' tuần, ' + hp.NgayBatDau + ' - ' + hp.NgayKetThuc + ', Phòng học: '+hp.PhongHoc}">
+                        </td>
+                        <td class="siso" th:data-ma-lop="${hp.MaLop}" th:text="${'0 / ' + hp.SiSo}"></td>
+                        <td>
+                            <form th:action="@{/admin/deleteLopHoc/{maLop}(maLop=${hp.maLop})}" method="post"
+                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa lớp học này?');">
+                                <input type="hidden" name="_method" value="delete" />
+                                <button type="submit" class="btn-remove">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                            <a th:href="@{'/admin/lophoc/sualophoc/' + ${hp.maLop}}" class="btn-remove"
+                                style="background-color: #6990c8;">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                        </td>
+                        <td>
+                            <a th:href="@{'/admin/lophoc/danhsachsinhvien/' + ${hp.maLop}}" class="btn-remove"
+                                style="background-color: #6990c8;">
+                                <i class="fas fa-list"></i>
+                            </a>
+                        </td>
+
+                </tbody>
+            </table>
+        </div>
+        <!-- Thêm thông báo nếu danh sách rỗng -->
+        <div th:if="${lopHocList == null or #lists.isEmpty(lopHocList)}" style="text-align: center; padding: 20px;">
+            Không có lớp học phần nào để hiển thị.
+        </div>
+    </div>
+
+
+    <!-- Script để làm mờ và xóa thông báo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 3000);
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll(".siso");
+
+            rows.forEach(row => {
+                const maLop = row.getAttribute("data-ma-lop");
+                fetch(`/DKHP/${maLop}/siso`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const siSoToiDa = row.textContent.split("/")[1].trim(); // Lấy sĩ số tối đa từ Thymeleaf
+                        row.textContent = `${data} / ${siSoToiDa}`; // Cập nhật số sinh viên đăng ký
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi lấy số lượng đăng ký:", error);
+                        row.textContent = `0 / ${row.textContent.split("/")[1].trim()}`; // Nếu lỗi, giữ 0
+                    });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const submenuParents = document.querySelectorAll('.has-submenu > .parent-link');
+
+            submenuParents.forEach(parentLink => {
+                parentLink.addEventListener('click', function (event) {
+                    event.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ 'a' (chuyển hướng trang)
+                    const parentMenuItem = this.closest('.menu-item');
+                    parentMenuItem.classList.toggle('active');
+
+                    const submenu = parentMenuItem.querySelector('.submenu');
+                    if (submenu) {
+                        if (parentMenuItem.classList.contains('active')) {
+                            submenu.style.display = 'block'; // Đảm bảo submenu hiển thị để tính scrollHeight
+                            submenu.style.maxHeight = submenu.scrollHeight + 'px'; // Đặt max-height bằng chiều cao thật của nội dung
+                            submenu.style.opacity = '1';
+                        } else {
+                            submenu.style.maxHeight = '0';
+                            submenu.style.opacity = '0';
+                            // Sau khi hiệu ứng chuyển đổi hoàn tất, ẩn hẳn submenu
+                            setTimeout(() => {
+                                submenu.style.display = 'none';
+                            }, 300); // Thời gian này nên khớp với 'transition' trong CSS của .submenu
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
