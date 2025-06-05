@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý thông tin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        html,
+        body {
+            font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+        }
+
+        /*CẤU HÌNH CÁI SIDEBAR DỌC*/
+        .sidebar {
+            width: 250px;
+            background-color: #1e396f;
+            color: #ecf0f1;
+            height: 100vh;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .sidebar a:hover {
+            background-color: #264e9d;
+            color: #ffffff;
+        }
+
+        .sidebar .fas,
+        .sidebar .fa-solid {
+            margin-right: 12px;
+            font-size: 18px;
+            color: #eeeff3;
+        }
+
+        .sidebar .submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: #043862;
+            display: none;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .sidebar .submenu li {
+            margin-bottom: 0;
+        }
+
+        .sidebar .submenu a {
+            padding: 10px 20px 10px 50px;
+            font-size: 15px;
+            color: #bdc3c7;
+            position: relative;
+        }
+
+        .sidebar .submenu a:hover {
+            background-color: #234a6e;
+            color: #ffffff;
+        }
+
+        .sidebar .submenu a::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 15px;
+            width: 2px;
+            background-color: #1a87a8;
+            border-radius: 1px;
+        }
+
+        .dropdown-arrow {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+            color: #bdc3c7;
+        }
+
+        .sidebar .menu-item .parent-link .dropdown-arrow i {
+            font-size: 10px !important;
+        }
+
+        .has-submenu.active .dropdown-arrow {
+            transform: rotate(90deg);
+        }
+
+        .has-submenu.active>.parent-link {
+            background-color: #1e396f;
+            color: #ffffff;
+        }
+
+        .content-wrapper {
+            flex-grow: 1;
+            margin-left: 250px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        .main {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .cards {
+            width: 100%;
+            padding: 45px 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 45px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 7px 25px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        .card i {
+            font-size: 1.75em;
+            color: #0e4572;
+        }
+
+        .card .number {
+            font-size: 28px;
+        }
+
+        .card .card-name {
+            font-size: 16px;
+            color: #3677ab;
+            white-space: nowrap;
+        }
+
+        /* CẤU HÌNH CÁC BIỂU ĐỒ */
+        .charts {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto auto;
+            grid-gap: 20px;
+            width: 100%;
+            padding: 0px;
+            box-sizing: border-box;
+            padding-top: 0px;
+            padding-bottom: 0px;
+        }
+
+        .chart-item {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .large-chart {
+            grid-column: 1 / 2;
+            grid-row: 1 / span 2;
+            /* Chiếm cả hai hàng */
+            height: 550px;
+            /* Đảm bảo nó chiếm đủ chiều cao */
+            position: relative;
+        }
+
+        .small-chart-top {
+            grid-column: 2 / 3;
+            /* Nằm ở cột thứ hai */
+            grid-row: 1 / 2;
+            /* Nằm ở hàng đầu tiên */
+            position: relative;
+            height: 290px;
+        }
+
+        .small-chart-bottom {
+            grid-column: 2 / 3;
+            /* Nằm ở cột thứ hai */
+            grid-row: 2 / 3;
+            /* Nằm ở hàng thứ hai */
+            position: relative;
+            height: 200px;
+        }
+
+        .chart-title {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #555;
+            text-align: center;
+            width: 100%;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 100%;
+        }
+
+        .chart h3 {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 0;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .sidebar .sidebar-logout-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 12px 20px;
+            background-color: transparent;
+            border: none;
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'Segoe UI', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar .sidebar-logout-button:hover {
+            background-color: #264e9d;
+            color: #ffffff;
+        }
+
+        .sidebar .sidebar-logout-button .fas,
+        .sidebar .sidebar-logout-button .fa-solid {
+            margin-right: 12px;
+            font-size: 18px;
+            color: #eeeff3;
+        }
+
+
+        .sidebar li form {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* CẤU HÌNH CÁC NÚT BẤM VÀ CÁC Ô NHẬP LIỆU */
+        select {
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #e6f7ff;
+            width: 110px;
+        }
+
+
+        input:focus,
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+        }
+
+        .btn {
+            background-color: #3b8df9;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 90px;
+            font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #73b3f7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <!-- Nội dung Sidebar của bạn -->
+        <ul>
+            <li class="menu-item">
+                <a href="/admin">
+                    <i class="fas fa-home"></i>
+                    <span>Admin panel</span>
+                </a>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/sinhvien" class="parent-link">
+                    <i class="fas fa-user-graduate"></i>
+                    Quản lý sinh viên
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themsinhvien">Thêm sinh viên</a></li>
+                    <li><a href="/admin/sinhvien">Thông tin sinh viên</a></li>
+                </ul>
+
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/giangvien" class="parent-link">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Quản lý giảng viên
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themgiangvien">Thêm giảng viên</a></li>
+                    <li><a href="/admin/giangvien">Thông tin giảng viên</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/monhoc" class="parent-link">
+                    <i class="fas fa-book"></i>
+                    Quản lý môn học
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themmonhoc">Thêm môn học</a></li>
+                    <li><a href="/admin/monhoc">Thông tin môn học</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="/admin/lophoc" class="parent-link">
+                    <i class="fas fa-school"></i>
+                    <span>Quản lý lớp học</span>
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="/admin/themlophoc">Thêm lớp học</a></li>
+                    <li><a href="/admin/lophoc">Thông tin lớp học</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="/admin/motrangdkhp">
+                    <i class="fas fa-calendar-check"></i>
+                    Mở/Đóng Đăng ký học phần
+                </a>
+            </li>
+            <li class="menu-item">
+                <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+                    <button type="submit" class="sidebar-logout-button">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content-wrapper">
+        <h2 style="text-align: center; margin-top: 0; margin-bottom: 20px;">TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN</h2>
+
+
+        <form action="/admin" method="get" id="filterForm">
+            <div class="form-group">
+                <label for="monHoc">Môn học:</label>
+                <select name="monHoc" id="monHoc">
+                    <option value="">-- Tất cả --</option>
+                    <option th:each="mh : ${dsMonHoc}" th:value="${mh}" th:text="${mh}"
+                        th:selected="${mh == selectedMonHoc}">
+                    </option>
+                </select>
+
+                <label for="hocKy" style="margin-left: 20px;">Học kỳ:</label>
+                <select name="hocKy" id="hocKy">
+                    <option value="">-- Tất cả --</option>
+                    <option th:each="hk : ${dsHocKy}" th:value="${hk}" th:text="${hk}"
+                        th:selected="${hk == selectedHocKy}">
+                    </option>
+                </select>
+
+                <button type="submit" class="btn btn-primary" style="margin-left: 20px;">Lọc</button>
+            </div>
+        </form>
+
+        <div class="main">
+            <div class="cards">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="number" th:text="${soSinhVienDaDangKy}">0</div>
+                        <div class="card-name">Sinh viên đã đăng ký học phần</div>
+                    </div>
+                    <div class="icon-box">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="number" th:text="${soHocPhan}">0</div>
+                        <div class="card-name">Số học phần đã mở</div>
+                    </div>
+                    <div class="icon-box">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="number" th:text="${#numbers.formatDecimal(soTinChiTrungBinh, 1, 2)}"></div>
+                        <div class="card-name">Trung bình tín chỉ sinh viên đã đăng ký</div>
+                    </div>
+                    <div class="icon-box">
+                        <i class="fas fa-chart-column"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khu vực hiển thị biểu đồ -->
+        <div class="charts">
+            <div class="chart-item large-chart">
+                <canvas id="dailyLineChart"></canvas>
+                <p class="chart-title">Lượt đăng ký theo ngày</p>
+            </div>
+            <div class="chart-item small-chart-top">
+                <canvas id="hourlyLineChart"></canvas>
+                <p class="chart-title">Lượt đăng ký theo giờ</p>
+            </div>
+            <div class="chart-item small-chart-bottom">
+                <canvas id="barChart"></canvas>
+                <p class="chart-title">Số sinh viên theo ngành</p>
+            </div>
+
+        </div>
+        <!-- Khu vực hiển thị lỗi chung cho các biểu đồ -->
+        <div id="chartErrorMessages" style="color: red; text-align: center; padding: 10px;"></div>
+    </div>
+
+    <!-- Nhúng Chart.js TRƯỚC các file script tùy chỉnh -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="dailyLineChart.js"></script>
+    <script src="hourlyLineChart.js"></script>
+    <script src="barChart.js"></script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const submenuParents = document.querySelectorAll('.has-submenu .parent-link');
+            submenuParents.forEach(function (parentLink) {
+                parentLink.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const parentLi = this.closest('.has-submenu');
+                    const submenu = parentLi.querySelector('.submenu');
+                    parentLi.classList.toggle('active');
+
+                    if (submenu.style.display === 'block') {
+                        submenu.style.maxHeight = '0';
+                        submenu.style.opacity = '0';
+                        setTimeout(() => {
+                            submenu.style.display = 'none';
+                        }, 300);
+                    } else {
+                        submenu.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                            submenu.style.opacity = '1';
+                        });
+                    }
+                });
+            });
+
+            const errorDiv = document.getElementById('chartErrorMessages');
+
+            // Gọi biểu đồ lượt đăng ký theo ngày và theo giờ khi tải trang
+            if (typeof renderLineChart === 'function') {
+                renderLineChart({
+                    canvasId: 'dailyLineChart',
+                    apiUrl: '/admin/chart-data/luotdangkyngay',
+                    chartLabel: 'Lượt đăng ký theo ngày',
+                    xAxisLabel: 'Ngày',
+                    yAxisLabel: 'Số lượt',
+
+                    reverseData: true
+                });
+
+
+                renderLineChart({
+                    canvasId: 'hourlyLineChart',
+                    apiUrl: '/admin/chart-data/luotdangkygio',
+                    chartLabel: 'Lượt đăng ký theo giờ',
+                    xAxisLabel: 'Giờ',
+                    yAxisLabel: 'Số lượt',
+                    processTimeLabels: true,
+                    reverseData: true
+                });
+            } else {
+                console.error("Hàm renderLineChart không được định nghĩa. Kiểm tra các file dailyChart.js/hourlyChart.js.");
+                if (errorDiv) {
+                    errorDiv.innerHTML += "<p>Lỗi cấu hình: Không thể tải biểu đồ lượt đăng ký theo ngày hoặc theo giờ.</p>";
+                }
+            }
+
+            // Biểu đồ sinh viên theo ngành
+            const form = document.getElementById("filterForm");
+
+            // Khi load lần đầu
+            if (typeof renderBarChart === 'function') {
+                const monHoc = document.getElementById("monHoc")?.value || "";
+                const hocKy = document.getElementById("hocKy")?.value || "";
+                const apiUrl = `/admin/chart-data/phansinhvientheonganh?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
+                renderBarChart('barChart', apiUrl);
+            }
+
+            // Khi nhấn nút Lọc
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const monHoc = document.getElementById("monHoc")?.value || "";
+                const hocKy = document.getElementById("hocKy")?.value || "";
+
+                const apiBar = `/admin/chart-data/phansinhvientheonganh?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
+                const apiDaily = `/admin/chart-data/luotdangkyngay?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
+                const apiHourly = `/admin/chart-data/luotdangkygio?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
+
+                console.log("Gửi API: ", apiDaily, apiHourly, apiBar);
+
+                if (typeof renderBarChart === 'function') {
+                    renderBarChart('barChart', apiBar);
+                } else {
+                    console.error("Hàm renderBarChart không được định nghĩa. Kiểm tra file BarChart.js.");
+                    if (errorDiv) {
+                        errorDiv.innerHTML += "<p>Lỗi cấu hình: Không thể tải biểu đồ số sinh viên theo ngành.</p>";
+                    }
+                }
+
+                if (typeof renderLineChart === 'function') {
+                    renderLineChart({
+                        canvasId: 'dailyLineChart',
+                        apiUrl: apiDaily,
+                        chartLabel: 'Lượt đăng ký theo ngày',
+                        xAxisLabel: 'Ngày',
+                        yAxisLabel: 'Số lượt',
+
+                        reverseData: true
+                    });
+
+                    renderLineChart({
+                        canvasId: 'hourlyLineChart',
+                        apiUrl: apiHourly,
+                        chartLabel: 'Lượt đăng ký theo giờ',
+                        xAxisLabel: 'Giờ',
+                        yAxisLabel: 'Số lượt',
+                        processTimeLabels: true,
+                        reverseData: true
+                    });
+                } else {
+                    console.error("Hàm renderLineChart không được định nghĩa.");
+                    if (errorDiv) {
+                        errorDiv.innerHTML += "<p>Lỗi cấu hình: Không thể tải biểu đồ lượt đăng ký.</p>";
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>
