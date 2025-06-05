@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <title>Đăng ký môn dạy</title>
+    <link rel="stylesheet" href="/css/styleDKGD.css">
+
+    <style>
+        /* Footer nút xác nhận */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #f9f9f9;
+            padding: 10px 20px;
+            text-align: right;
+            border-top: 1px solid #ccc;
+            z-index: 10;
+        }
+
+        .footer .confirm-btn {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .footer .confirm-btn:hover {
+            background: linear-gradient(135deg, #0083b0, #005f73);
+            transform: scale(1.05);
+        }
+
+        /* Tìm kiếm form */
+        /* Thanh tìm kiếm đẹp hơn nha */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .search-input input[type="text"] {
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 395px;
+        }
+
+        .search-button, .search-btn {
+            background-color: #005295;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .search-button:hover,
+        .search-btn:hover {
+            background-color: #003f7f;
+        }
+
+        /* Phần sau đây là cho thanh kéo cuộn của table đăng ký môn dạy */
+        .table-container {
+            max-height: 400px; /* 👈 Chiều cao bảng hiển thị */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        /* Giữ cố định header khi cuộn */
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f0f0f0;
+            z-index: 2;
+        }
+
+        /* Tùy chỉnh bảng cho đẹp */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table th, table td {
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        /* new */
+            .scrollable-table-wrapper {
+        max-height: 350px; /* Chiều cao cố định bạn muốn, có thể tăng/giảm */
+        overflow-y: auto; /* Hiển thị thanh cuộn dọc khi cần */
+        //border: 1px solid #ccc; /* Cho khung rõ ràng hơn, rõ dữ r đó xấu vcl */
+        border-radius: 8px;
+    }
+
+    /* Optional: Cố định header bảng */
+    .scrollable-table-wrapper table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    /* khong can cai nay de dinh dang lai dau toi co roi
+    .scrollable-table-wrapper thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f2f2f2;
+        z-index: 1;
+        box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+    }
+*/
+// cho cai checkbox nam giua
+        .checkbox-cell {
+    text-align: center;
+    vertical-align: middle;
+    height: 100%; /* đảm bảo td có chiều cao để căn giữa */
+}
+            /* Wrapper cho phần user và dropdown */
+        .user-dropdown-wrapper {
+          margin-left: auto; /* Đẩy phần user sang phải cùng */
+          position: relative; /* Cần thiết để định vị dropdown con */
+          display: flex; /* Thêm để căn chỉnh trigger bên trong nếu cần */
+          align-items: center; /* Căn chỉnh trigger */
+        }
+
+        /* Phần click để mở dropdown */
+        .user-info-trigger {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          border-radius: 4px;
+          transition: background-color 0.2s ease-in-out;
+          /* Nếu bạn muốn nó giống user-info, có thể thêm một số thuộc tính từ .user-info */
+          font-weight: 500;
+          font-size: 16px;
+          color: #000;
+        }
+
+        .user-info-trigger:hover {
+          background-color: #e9ecef; /* Màu nền khi hover */
+        }
+
+        .username-display {
+          /* font-weight: 500; Đã có trong user-info-trigger */
+          /* color: #333; Đã có trong user-info-trigger */
+          margin-right: 8px; /* Khoảng cách giữa tên và icon mũi tên */
+        }
+
+        .user-caret-icon {
+          /* color: #555; Đã có trong user-info-trigger nếu bạn muốn đồng bộ */
+          font-size: 0.9em; /* Kích thước icon mũi tên */
+          transition: transform 0.2s ease-in-out; /* Hiệu ứng xoay mũi tên */
+        }
+        /* Nội dung dropdown */
+        .dropdown-content-simple {
+          display: none;      /* QUAN TRỌNG: Phải ẩn ban đầu */
+          position: absolute; /* QUAN TRỌNG: Để định vị so với cha */
+          background-color: white;
+          min-width: 160px; /* Chiều rộng tối thiểu của dropdown */
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.15);
+          z-index: 1001; /* Đảm bảo dropdown nổi lên trên menu (menu có z-index: 1000) */
+          right: 0; /* Căn phải với wrapper */
+          top: calc(100% + 5px); /* Vị trí ngay dưới trigger, có khoảng cách 5px */
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          overflow: hidden; /* Để bo góc hoạt động đúng với button bên trong */
+        }
+
+        /* Nút đăng xuất trong dropdown */
+        .dropdown-item-simple.logout-button-simple {
+          display: block; /* Để chiếm toàn bộ chiều rộng */
+          width: 100%;
+          padding: 10px 15px;
+          text-align: left; /* Căn chữ sang trái */
+          background-color: transparent;
+          border: none;
+          color: #333;
+          font-size: 14px;
+          cursor: pointer;
+          font-family: inherit; /* Kế thừa font từ body/nav */
+        }
+
+        .dropdown-item-simple.logout-button-simple:hover {
+          background-color: #f0f0f0; /* Màu nền khi hover nút */
+          color: #0056b3; /* Màu chữ khi hover nút */
+        }
+
+            /* Wrapper cho phần user và dropdown */
+        .user-dropdown-wrapper {
+          margin-left: auto; /* Đẩy phần user sang phải cùng */
+          position: relative; /* Cần thiết để định vị dropdown con */
+          display: flex; /* Thêm để căn chỉnh trigger bên trong nếu cần */
+          align-items: center; /* Căn chỉnh trigger */
+        }
+
+        /* Phần click để mở dropdown */
+        .user-info-trigger {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          border-radius: 4px;
+          transition: background-color 0.2s ease-in-out;
+          /* Nếu bạn muốn nó giống user-info, có thể thêm một số thuộc tính từ .user-info */
+          font-weight: 500;
+          font-size: 16px;
+          color: #000;
+        }
+
+        .user-info-trigger:hover {
+          background-color: #e9ecef; /* Màu nền khi hover */
+        }
+
+        .username-display {
+          /* font-weight: 500; Đã có trong user-info-trigger */
+          /* color: #333; Đã có trong user-info-trigger */
+          margin-right: 8px; /* Khoảng cách giữa tên và icon mũi tên */
+        }
+
+        .user-caret-icon {
+          /* color: #555; Đã có trong user-info-trigger nếu bạn muốn đồng bộ */
+          font-size: 0.9em; /* Kích thước icon mũi tên */
+          transition: transform 0.2s ease-in-out; /* Hiệu ứng xoay mũi tên */
+        }
+        /* Nội dung dropdown */
+        .dropdown-content-simple {
+          display: none;      /* QUAN TRỌNG: Phải ẩn ban đầu */
+          position: absolute; /* QUAN TRỌNG: Để định vị so với cha */
+          background-color: white;
+          min-width: 160px; /* Chiều rộng tối thiểu của dropdown */
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.15);
+          z-index: 1001; /* Đảm bảo dropdown nổi lên trên menu (menu có z-index: 1000) */
+          right: 0; /* Căn phải với wrapper */
+          top: calc(100% + 5px); /* Vị trí ngay dưới trigger, có khoảng cách 5px */
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          overflow: hidden; /* Để bo góc hoạt động đúng với button bên trong */
+        }
+
+        /* Nút đăng xuất trong dropdown */
+        .dropdown-item-simple.logout-button-simple {
+          display: block; /* Để chiếm toàn bộ chiều rộng */
+          width: 100%;
+          padding: 10px 15px;
+          text-align: left; /* Căn chữ sang trái */
+          background-color: transparent;
+          border: none;
+          color: #333;
+          font-size: 14px;
+          cursor: pointer;
+          font-family: inherit; /* Kế thừa font từ body/nav */
+        }
+
+        .dropdown-item-simple.logout-button-simple:hover {
+          background-color: #f0f0f0; /* Màu nền khi hover nút */
+          color: #0056b3; /* Màu chữ khi hover nút */
+        }
+    </style>
+
+</head>
+
+<body>
+
+<nav>
+
+    <button class="confirm-btn">
+        <a th:href="@{/lecturer/dashboarddkgd}" style="text-decoration: none; color: inherit;">Dashboard</a>
+    </button>
+    <button class="tab-btn active">
+        <a th:href="@{/lecturer/dangkymonday}" style="text-decoration: none; color: inherit;">Đăng ký môn dạy</a>
+    </button>
+    <button class="tab-btn">
+        <a th:href="@{/lecturer/dangkylichday}" style="text-decoration: none; color: inherit;">Đăng ký lịch dạy</a>
+    </button>
+    <button class="tab-btn">
+        <a th:href="@{/lecturer/danhsachdkgd}" style="text-decoration: none; color: inherit;">Xem môn, lịch đã đăng ký</a>
+    </button>
+    <button class="tab-btn">
+        <a th:href="@{/lecturer/danhsachphancong}" style="text-decoration: none; color: inherit;">Danh sách lớp dạy</a>
+    </button>
+
+    <div class="user-dropdown-wrapper">
+        <!-- Phần kích hoạt dropdown (Tên người dùng và icon mũi tên) -->
+        <div id="userInfoTrigger" class="user-info-trigger">
+            <span th:text="${#authentication.name ?: 'Người dùng'}" class="username-display">Tên Người Dùng</span>
+            <i class="fas fa-caret-down user-caret-icon"></i> <!-- Icon mũi tên xuống, cần Font Awesome -->
+        </div>
+
+        <!-- Nội dung Dropdown -->
+        <div id="userDropdownContent" class="dropdown-content-simple">
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button type="submit" class="dropdown-item-simple logout-button-simple">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+
+
+</nav>
+
+<div class="container">
+    <div th:if="${ketQuaDangKy != null}" style="margin-bottom: 20px;">
+        <ul style="list-style: none; padding-left: 0;">
+            <li th:each="entry : ${ketQuaDangKy}"
+                th:style="${entry.value.toLowerCase().contains('thành công')} ? 'margin-bottom:10px; padding:12px; border-radius:8px; background-color:#d4edda; color:#155724; border:1px solid #c3e6cb;'
+                 : 'margin-bottom:10px; padding:12px; border-radius:8px; background-color:#f8d7da; color:#721c24; border:1px solid #f5c6cb;'">
+                <i th:classappend="${entry.value.toLowerCase().contains('thành công')} ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark'"
+                   style="margin-right: 8px;"></i>
+                <strong th:text="${entry.key}">Mã môn học</strong>:
+                <span th:text="${entry.value}">Thông báo</span>
+            </li>
+        </ul>
+    </div>
+
+    <h1>Đăng ký môn dạy</h1>
+
+    <form class="search-bar" method="get" th:action="@{/lecturer/dangkymonday}">
+
+        <div class="search-input">
+            <!-- tat ca la tai m, con name="" khien t khong the nao search duoc -->
+            <input type="text" name="maMH" placeholder="Mã môn học" th:value="${maMH}">
+            <i class="fa fa-search"></i>
+        </div>
+
+        <div class="search-input">
+            <input type="text" name ="tenMH" placeholder="Tên môn học" th:value="${tenMH}">
+            <i class="fa fa-search"></i>
+        </div>
+
+        <button type="submit" class="search-btn">Tìm kiếm</button>
+        <a th:href="@{/lecturer/dangkymonday}" class="search-btn" style="background-color: gray; text-decoration: none;">Hiển thị tất cả</a>
+
+
+    </form>
+
+    <form th:action="@{/lecturer/luuphieudangky}" method="post">
+
+        <div class="scrollable-table-wrapper">
+            <!-- <input type="hidden" name="maHK" th:value="${maHK}"/> no need if dont take it from form -->
+            <table>
+                <thead>
+                <tr>
+                    <th>Mã môn học</th>
+                    <th>Tên môn học</th>
+                    <th>Số TC</th>
+                    <th>Loại môn</th>
+                    <th>Mã Khoa - Tên Khoa</th>
+                    <th>Chọn</th>
+                </tr>
+                </thead>
+
+                <!-- Vấn đề hiện tại là lỗi 400 Bad Request và thông báo thiếu tham số maHK trong controller.
+                Trong HTML bạn vừa gửi, bạn có checkbox selectedMon, nhưng chưa có input chứa maHK,
+                vì vậy khi người dùng nhấn submit, tham số maHK không được gửi lên → gây lỗi. -->
+                <tbody>
+                <tr th:each="mh : ${monHocList}" th:attr="data-ma-mh=${mh.MaMH}">
+
+                    <td th:text="${mh.MaMH}"></td>
+                    <td th:text="${mh.TenMH}" ></td>
+                    <td th:text="${mh.SoTinChi}"></td>
+                    <td th:text="${mh.LoaiMon}"></td>
+                    <td th:text="${mh.MaKhoa + ' - ' + mh.TenKhoa}"></td>
+                    <td class="checkbox-cell">
+                        <label class="aesthetic-checkbox">
+                            <input type="checkbox" name="selectedMon" th:value="${mh.maMH}">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <button id="btnXacNhan" class="confirm-btn">Xác nhận</button>
+        </div>
+
+    </form>
+
+</div>
+
+<!-- Script để làm mờ và xóa thông báo -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(alert => {
+          alert.style.transition = 'opacity 0.5s ease';
+          alert.style.opacity = '0';
+          setTimeout(() => alert.remove(), 500); // Xóa hoàn toàn sau khi mờ dần
+        });
+      }, 3000);
+    });
+            document.addEventListener('DOMContentLoaded', function () {
+        const trigger = document.getElementById('userInfoTrigger');
+        const dropdownMenu = document.getElementById('userDropdownContent');
+
+        if (trigger && dropdownMenu) {
+            trigger.addEventListener('click', function (event) {
+                // Ngăn sự kiện click lan ra ngoài, nếu trigger nằm trong phần tử có thể click khác
+                event.stopPropagation();
+                // Toggle hiển thị menu
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Đóng menu nếu click ra bất kỳ đâu bên ngoài menu và trigger
+            document.addEventListener('click', function (event) {
+                if (dropdownMenu.style.display === 'block' && !trigger.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+                    // (Tùy chọn) Đóng menu khi nhấn phím Escape
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && dropdownMenu.style.display === 'block') {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        }
+        });
+</script>
+
+
+</body>
+</html>
