@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng ký học phần</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+
+<body>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+
+    html,
+    body {
+      font-size: 16px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    input:not([type="submit"]),
+    select {
+      padding: 10px 12px;
+      /* Giảm padding ngang để không quá rộng */
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 17px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      background-color: #e6f7ff;
+      width: 100%;
+    }
+
+
+    input:focus,
+    select:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    }
+
+
+    .table-container {
+      max-height: 700px;
+      overflow-y: auto;
+      border: none;
+      box-shadow: none;
+    }
+
+
+    th,
+    td {
+      padding: 13px 20px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+
+    /* Căn trái cho các cột cụ thể */
+    td:nth-child(2),
+    td:nth-child(3),
+    td:nth-child(5),
+    td:nth-child(6) {
+      text-align: left;
+    }
+
+
+    th {
+      background-color: #ADD8E6;
+      color: #005295;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+
+    /* Header bảng giữ cố định */
+    thead th {
+      position: sticky;
+      top: 0;
+      background-color: #ADD8E6;
+      z-index: 1;
+      font-size: 16px;
+      background-clip: padding-box;
+    }
+
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+
+    /* Footer nút xác nhận */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 250px;
+      right: 0;
+      background-color: #f9f9f9;
+      padding: 10px 20px;
+      text-align: right;
+      border-top: 1px solid #ccc;
+      z-index: 10;
+    }
+
+
+    .footer button {
+      background-color: #ADD8E6;
+      color: #76aedc;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+
+    .footer button:hover {
+      background-color: #77b3f3;
+    }
+
+
+    .content {
+      flex-grow: 1;
+      width: 100%;
+      max-width: 900px;
+      /* Giảm max-width để form trông gọn gàng hơn */
+      margin: 50px auto;
+      /* Giữ nguyên căn giữa */
+      background: #ffffff;
+      /*padding: 40px 50px;*/
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      margin-left: 450px;
+      /* Điều chỉnh margin-left để phù hợp với sidebar */
+    }
+
+
+    .content>.back-button {
+      margin-bottom: 30px;
+      margin-left: 0;
+      align-self: flex-start;
+      background-color: #123b8c;
+    }
+
+
+    /* Bo tròn nút */
+    .search-btn,
+    .confirm-btn {
+      background-color: #3c94f3;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 4px 0px;
+      border-radius: 25px;
+      cursor: pointer;
+    }
+
+
+    .form-title {
+      flex-grow: 1;
+      font-size: 22px;
+      font-weight: bold;
+      color: #060606;
+      margin: 0;
+      width: 100%;
+      margin-left: 0;
+      padding-bottom: 10px;
+      padding-top: 0px;
+      /* Bỏ margin-left âm */
+      text-align: center;
+    }
+
+
+    /* Form chính */
+    .student-form {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+    }
+
+
+    /* Mỗi ô nhập liệu (label + input/select) */
+    .form-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 0;
+    }
+
+
+    .form-field label {
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+      font-size: 16px;
+      display: flex;
+    }
+
+
+    .form-field input::placeholder {
+      color: #aaa;
+    }
+
+
+    .form-field input[type="text"],
+    .form-field select {
+      width: 100%;
+      padding: 10px 12px;
+      /* Cân đối padding */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 17px;
+      box-sizing: border-box;
+    }
+
+
+    .form-field input[type="text"]::placeholder {
+      color: #aaa;
+    }
+
+
+    /* Cho trường ngày sinh có icon */
+    .input-with-icon {
+      position: relative;
+      width: 100%;
+    }
+
+
+    .input-with-icon input {
+      padding-right: 35px;
+    }
+
+
+    .input-with-icon .fas,
+    .input-with-icon .fa-solid {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+      pointer-events: none;
+      font-size: 17px;
+    }
+
+
+    .search-btn:hover,
+    .confirm-btn:hover {
+      background-color: #73b3f7;
+    }
+
+
+    .card {
+      background-color: #fff;
+      max-width: 800px;
+      margin: 16px auto;
+      padding: 12px 16px;
+      border-radius: 6px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e5e5e5;
+      text-align: left;
+      font-size: 14.5px;
+    }
+
+
+    .card-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #004b8d;
+      margin: 0 0 8px 0;
+      padding: 4px 0;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+
+    .card ul,
+    .card ol {
+      margin-left: 20px;
+      padding-left: 20px;
+    }
+
+
+    .dashboard {
+      margin-top: 80px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+
+    .grid-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      /* Giữ 2 cột */
+      gap: 25px 40px;
+      /* Điều chỉnh khoảng cách giữa các trường */
+      margin-top: 20px;
+      width: 100%;
+      /* Sử dụng 100% chiều rộng của .content */
+    }
+
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 17px;
+    }
+
+
+    .form-group.full-width {
+      grid-column: span 2;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+
+    .form-group.full-width button.confirm-btn {
+      width: fit-content;
+      /* Đảm bảo nút có chiều rộng tự động */
+      padding: 10px 40px;
+      /* Tăng padding cho nút lớn hơn */
+      margin: 0 auto;
+      display: block;
+      font-size: 15px;
+      /* Tăng cỡ chữ cho nút */
+      border-radius: 30px;
+      /* Bo tròn hơn */
+    }
+
+
+    h1 {
+      color: #010812;
+      padding-left: 30px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+
+    .tab-btn.active {
+      background-color: #ADD8E6;
+      color: white;
+    }
+
+
+    .input-label {
+      display: block;
+      font-size: 16px;
+      font-weight: bold;
+      color: #313238;
+      margin-bottom: 8px;
+    }
+
+
+    .error-icon {
+      color: red;
+      font-weight: bold;
+      margin-left: 5px;
+      display: inline-block;
+    }
+
+
+    .error-message i {
+      font-size: 14px;
+    }
+
+
+    /* Trường giữ chỗ nếu số lượng input lẻ */
+    .placeholder-field {
+      visibility: hidden;
+    }
+
+
+    @media (max-width: 768px) {
+      .grid-form {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 20px;
+      }
+
+
+      .form-title {
+        margin-left: 0;
+      }
+
+
+      .content {
+        margin-left: auto;
+        margin-right: auto;
+        padding: 30px 20px;
+        /* Điều chỉnh padding cho màn hình nhỏ */
+      }
+
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        box-shadow: none;
+        padding-top: 0;
+      }
+
+
+      .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+
+      .sidebar li {
+        width: 50%;
+        /* Chia 2 cột trên di động */
+        margin-bottom: 0;
+      }
+
+
+      .sidebar a {
+        justify-content: center;
+        padding: 10px;
+        font-size: 14px;
+      }
+
+
+      .sidebar .fas,
+      .sidebar .fa-solid {
+        margin-right: 8px;
+        font-size: 16px;
+      }
+
+
+      .sidebar .submenu {
+        position: absolute;
+        width: 100%;
+        left: 0;
+        top: 100%;
+        /* Để submenu xuất hiện bên dưới */
+        z-index: 10;
+      }
+    }
+
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background-color: #123b8c;
+      color: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+
+    .back-button i {
+      font-size: 14px;
+    }
+
+
+    .back-button:hover {
+      background-color: #73b3f7;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+
+    .input-label {
+      display: block;
+      font-size: 16px;
+      font-weight: bold;
+      color: #313238;
+      margin-bottom: 8px;
+    }
+
+
+    select {
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 17px;
+      background-color: #e6f7ff;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.3s;
+    }
+
+
+    select:hover {
+      border-color: #888;
+    }
+
+
+    select:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+    }
+
+
+    /* Định dạng cho input type date */
+    input[type="date"] {
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 17px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #e6f7ff;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.3s;
+    }
+
+
+    input[type="date"]:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+    }
+
+
+    /* Đảm bảo biểu tượng calendar picker hiển thị */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      display: block;
+      cursor: pointer;
+      opacity: 0.6;
+      filter: none;
+      padding: 0;
+      margin: 0;
+    }
+
+
+    input[type="date"]:hover::-webkit-calendar-picker-indicator {
+      opacity: 1;
+    }
+
+
+    .sidebar {
+      width: 250px;
+      background-color: #1e396f;
+      color: #ecf0f1;
+      height: 100vh;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+    }
+
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+
+    .sidebar li {
+      margin-bottom: 5px;
+    }
+
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: #ecf0f1;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+
+    .sidebar a:hover {
+      background-color: #264e9d;
+      color: #ffffff;
+    }
+
+
+    .sidebar .fas,
+    .sidebar .fa-solid {
+      margin-right: 12px;
+      font-size: 18px;
+      color: #eeeff3;
+    }
+
+
+    .sidebar .submenu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background-color: #043862;
+      display: none;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    }
+
+
+    .sidebar .submenu li {
+      margin-bottom: 0;
+    }
+
+
+    .sidebar .submenu a {
+      padding: 10px 20px 10px 50px;
+      font-size: 15px;
+      color: #bdc3c7;
+      position: relative;
+    }
+
+
+    .sidebar .submenu a:hover {
+      background-color: #234a6e;
+      color: #ffffff;
+    }
+
+
+    .sidebar .submenu a::before {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 15px;
+      width: 2px;
+      background-color: #1a87a8;
+      border-radius: 1px;
+    }
+
+
+    .dropdown-arrow {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      transition: transform 0.3s ease;
+      color: #bdc3c7;
+    }
+
+
+    .sidebar .menu-item .parent-link .dropdown-arrow i {
+      font-size: 10px !important;
+    }
+
+
+    .has-submenu.active .dropdown-arrow {
+      transform: rotate(90deg);
+    }
+
+
+    .has-submenu.active>.parent-link {
+      background-color: #1e396f;
+      color: #ffffff;
+    }
+
+
+    .has-submenu.active>.parent-link:hover {
+      background-color: #1e396f;
+      color: #ffffff;
+    }
+
+    .sidebar .sidebar-logout-button {
+      display: flex;
+      /* Để căn chỉnh biểu tượng và văn bản giống như các thẻ <a> khác */
+      align-items: center;
+      width: 100%;
+      /* Làm cho nút chiếm toàn bộ chiều rộng của li */
+      padding: 12px 20px;
+      /* Giống padding của <a> */
+      background-color: transparent;
+      /* Xóa nền mặc định của nút */
+      border: none;
+      /* Xóa viền mặc định của nút */
+      color: #ecf0f1;
+      /* Giống màu chữ của <a> */
+      text-decoration: none;
+      /* Xóa gạch chân nếu có */
+      font-size: 16px;
+      /* Giống font-size của <a> */
+      font-weight: bold;
+      /* Giống font-weight của <a> */
+      text-align: left;
+      /* Căn chữ sang trái */
+      cursor: pointer;
+      /* Con trỏ tiêu chuẩn cho nút */
+      font-family: 'Segoe UI', sans-serif;
+      /* Đảm bảo font nhất quán */
+      transition: background-color 0.3s ease, color 0.3s ease;
+      /* Giống transition của <a> */
+    }
+
+    .sidebar .sidebar-logout-button:hover {
+      background-color: #264e9d;
+      /* Giống nền hover của <a> */
+      color: #ffffff;
+      /* Giống màu chữ hover của <a> */
+    }
+
+    .sidebar .sidebar-logout-button .fas,
+    .sidebar .sidebar-logout-button .fa-solid {
+      margin-right: 12px;
+      /* Giống margin của biểu tượng khác */
+      font-size: 18px;
+      /* Giống kích thước biểu tượng khác */
+      color: #eeeff3;
+      /* Giống màu biểu tượng khác */
+    }
+  </style>
+  <div class="sidebar">
+    <ul>
+      <li class="menu-item">
+        <a href="/admin">
+          <i class="fas fa-home"></i>
+          <span>Admin panel</span>
+        </a>
+      </li>
+      <li class="menu-item has-submenu">
+        <a href="/admin/sinhvien" class="parent-link">
+          <i class="fas fa-user-graduate"></i>
+          Quản lý sinh viên
+          <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <ul class="submenu">
+          <li><a href="/admin/themsinhvien">Thêm sinh viên</a></li>
+          <li><a href="/admin/sinhvien">Thông tin sinh viên</a></li>
+        </ul>
+      </li>
+      <li class="menu-item has-submenu">
+        <a href="/admin/giangvien" class="parent-link">
+          <i class="fas fa-chalkboard-teacher"></i>
+          Quản lý giảng viên
+          <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <ul class="submenu">
+          <li><a href="/admin/themgiangvien">Thêm giảng viên</a></li>
+          <li><a href="/admin/giangvien">Thông tin giảng viên</a></li>
+        </ul>
+      </li>
+      <li class="menu-item has-submenu">
+        <a href="/admin/monhoc" class="parent-link">
+          <i class="fas fa-book"></i>
+          Quản lý môn học
+          <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <ul class="submenu">
+          <li><a href="/admin/themmonhoc">Thêm môn học</a></li>
+          <li><a href="/admin/monhoc">Thông tin môn học</a></li>
+        </ul>
+      </li>
+      <li class="menu-item has-submenu">
+        <a href="/lophoc" class="parent-link">
+          <i class="fas fa-school"></i>
+          <span>Quản lý lớp học</span>
+          <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <ul class="submenu">
+          <li><a href="/admin/themlophoc">Thêm lớp học</a></li>
+          <li><a href="/admin/lophoc">Thông tin lớp học</a></li>
+        </ul>
+      </li>
+      <li class="menu-item has-submenu">
+      <li>
+        <a href="/admin/motrangdkhp">Mở/Đóng Đăng ký học phần</a>
+      </li>
+      </li>
+
+      <li class="menu-item">
+        <form th:action="@{/logout}" method="post" style="margin: 0; display: block;">
+          <button type="submit" class="sidebar-logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            Đăng xuất
+          </button>
+        </form>
+      </li>
+    </ul>
+  </div>
+
+
+  <div class="content">
+    <a href="/admin/giangvien" class="back-button">
+      <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+
+
+    <h2>NHẬP THÔNG TIN GIẢNG VIÊN</h2>
+
+
+    <div th:if="${error != null}" class="error-message">
+      <i class="fas fa-exclamation-circle" style="color: #d32f2f;"></i>
+      <span th:text="${error}"></span>
+    </div>
+    <form th:action="@{/admin/themgiangvien}" th:object="${giangVien}" method="POST" class="grid-form">
+
+
+      <div class="form-field">
+        <label for="maGV">Mã giảng viên <span class="error-icon">!</span></label>
+        <div class="input-with-icon">
+          <input type="text" id="maGV" th:field="*{maGV}" placeholder="VD: GV000001" required>
+          <i class="fas fa-id-card"></i>
+
+
+          <span th:if="${#fields.hasErrors('maGV')}" th:errors="*{maGV}" class="error" style="color:red;"></span>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="hoGV">Họ giảng viên</label>
+        <div class="input-with-icon">
+          <input type="text" id="hoGV" th:field="*{hoGV}" placeholder="VD: Nguyễn Văn" required>
+          <i class="fas fa-user-alt"></i>
+          <span th:if="${#fields.hasErrors('hoGV')}" th:errors="*{hoGV}" class="error" style="color:red;"></span>
+        </div>
+      </div>
+
+
+      <div class="form-field">
+        <label for="tenGV">Tên giảng viên</label>
+        <div class="input-with-icon">
+          <input type="text" id="tenGV" th:field="*{tenGV}" placeholder="VD: An" required>
+          <i class="fas fa-user-edit"></i>
+          <span th:if="${#fields.hasErrors('tenGV')}" th:errors="*{tenGV}" class="error" style="color:red;"></span>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="gioiTinh">Giới tính</label>
+        <div class="input-with-icon">
+          <select id="gioiTinh" th:field="*{gioiTinh}">
+            <option value="">Chọn giới tính</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+          <i class="fas fa-venus-mars"></i>
+          <span th:if="${#fields.hasErrors('gioiTinh')}" th:errors="*{gioiTinh}" class="error"
+            style="color:red;"></span>
+        </div>
+      </div>
+
+
+      <div class="form-field">
+        <label for="ngaySinh">Ngày sinh</label>
+        <div class="input-with-icon">
+          <input type="date" id="ngaySinh" th:field="*{ngaySinh}" placeholder="dd/mm/yyyy">
+          <span th:if="${#fields.hasErrors('ngaySinh')}" th:errors="*{ngaySinh}" class="error"
+            style="color:red;"></span>
+        </div>
+      </div>
+
+
+      <div class="form-field">
+        <label for="tinhTrang">Tình trạng</label>
+        <div class="input-with-icon">
+          <select id="tinhTrang" th:field="*{tinhTrang}">
+            <option value="">Chọn tình trạng</option>
+
+
+            <option value="Đang công tác">Đang công tác</option>
+            <option value="Tạm dừng công tác">Tạm dừng công tác</option>
+            <option value="Đã nghỉ việc">Đã nghỉ việc</option>
+            <option value="Khác">Khác</option>
+          </select>
+          <i class="fas fa-info-circle"></i>
+          <span th:if="${#fields.hasErrors('tinhTrang')}" th:errors="*{tinhTrang}" class="error"
+            style="color:red;"></span>
+        </div>
+      </div>
+
+
+      <div class="form-field">
+        <label for="hocHam">Học hàm</label>
+        <div class="input-with-icon">
+          <select id="hocHam" th:field="*{hocHam}">
+            <option value="">Chọn học hàm</option>
+            <option value="Phó Giáo sư">Phó Giáo sư</option>
+            <option value="Giáo sư">Giáo sư</option>
+            <option value="Không">Không</option>
+            <option value="Khác">Khác</option>
+          </select>
+          <i class="fas fa-scroll"></i>
+          <span th:if="${#fields.hasErrors('hocHam')}" th:errors="*{hocHam}" class="error" style="color:red;"></span>
+        </div>
+      </div>
+
+
+      <div class="form-field">
+        <label for="hocVi">Học vị</label>
+        <div class="input-with-icon">
+          <select id="hocVi" th:field="*{hocVi}">
+            <option value="">Chọn học vị</option>
+            <option value="Thạc sĩ">Thạc sĩ</option>
+            <option value="Tiến sĩ">Tiến sĩ</option>
+            <option value="Khác">Khác</option>
+          </select>
+          <i class="fas fa-user-graduate"></i>
+          <span th:if="${#fields.hasErrors('hocVi')}" th:errors="*{hocVi}" class="error" style="color:red;"></span>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+      <div class="form-field placeholder-field"></div>
+
+
+      <div class="form-group full-width">
+        <button type="submit" class="confirm-btn">Lưu thông tin</button>
+      </div>
+    </form>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const submenuParents = document.querySelectorAll('.has-submenu > .parent-link');
+
+
+      submenuParents.forEach(parentLink => {
+        parentLink.addEventListener('click', function (event) {
+          event.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ 'a' (chuyển hướng trang)
+          const parentMenuItem = this.closest('.menu-item');
+          parentMenuItem.classList.toggle('active');
+
+
+          const submenu = parentMenuItem.querySelector('.submenu');
+          if (submenu) {
+            if (parentMenuItem.classList.contains('active')) {
+              submenu.style.display = 'block'; // Đảm bảo submenu hiển thị để tính scrollHeight
+              submenu.style.maxHeight = submenu.scrollHeight + 'px'; // Đặt max-height bằng chiều cao thật của nội dung
+              submenu.style.opacity = '1';
+            } else {
+              submenu.style.maxHeight = '0';
+              submenu.style.opacity = '0';
+              // Sau khi hiệu ứng chuyển đổi hoàn tất, ẩn hẳn submenu
+              setTimeout(() => {
+                submenu.style.display = 'none';
+              }, 300); // Thời gian này nên khớp với 'transition' trong CSS của .submenu
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+
+</html>
