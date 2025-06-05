@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-// Xử lý nghiệp vụ cho Lecturer
 public class DKGDService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -68,17 +67,15 @@ public class DKGDService {
         String tenHKTrimmed = (tenHK != null) ? tenHK.trim() : "";
         String namHocTrimmed = (namHoc != null) ? namHoc.trim() : "";
 
-        // Nếu tất cả đều rỗng thì trả về toàn bộ danh sách môn học
         if (maGVTrimmed.isEmpty() && tenHKTrimmed.isEmpty() && namHocTrimmed.isEmpty()) {
             return monHocRepository.getDanhSachMH();
         }
 
-        // Gọi phương thức tìm kiếm trong repository với 3 tham số
         return monHocRepository.searchMonHoc(maGVTrimmed, tenHKTrimmed, namHocTrimmed);
     }
 
     public String getMaHKMoiNhat() {
-        return hpRepository.getMaHKMoiNhat(); // kh goi truc tiep tu HPREPOSITORY
+        return hpRepository.getMaHKMoiNhat(); 
     }
 
     public int dangKyMonDay(String maGV, String maHK, String maMH) {
@@ -92,10 +89,10 @@ public class DKGDService {
         System.out.println("MaMH: [" + maMH + "]");
         System.out.println("Length: " + maMH.length());
 
-        SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate) // gọi jdbc nếu dùng Spring
-                .withProcedureName("DANGKY_MONDAY") // GỌI HÀM THỦ TỤC DANGKYMONDAY TRONG DTB
-                .declareParameters( // CAC BIEN TUONG UNG
-                        new SqlParameter("p_magv", Types.VARCHAR), // Biến phải trùng trong biến của procedure Oracle
+        SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate) 
+                .withProcedureName("DANGKY_MONDAY") 
+                .declareParameters( 
+                        new SqlParameter("p_magv", Types.VARCHAR), 
                         new SqlParameter("p_mahk", Types.VARCHAR),
                         new SqlParameter("p_mamh", Types.VARCHAR),
                         new SqlOutParameter("p_result", Types.INTEGER));
@@ -110,7 +107,7 @@ public class DKGDService {
     }
 
     public int dangKyLichDay(String maGV, String maHK, String lichDay) {
-        // test xem coi có lỗi không
+        
         System.out.println("MaGV: [" + maGV + "]");
         System.out.println("Length: " + maGV.length());
 
@@ -149,15 +146,14 @@ public class DKGDService {
     }
     
     public boolean deleteTietDay(String maGV, String thu) {
-        // thu: Thứ 2, phai cast moi duoc
+        
         String trichxuat = thu.substring(4);
         int thuInt = Integer.parseInt(trichxuat);
         System.out.println("Thứ sẽ xóa trong database: "+ thuInt);
 
-        // dm quen TRIM() thoi do ma mat ca tieng fix????
         String sql = "DELETE FROM DANGKYLICH DK WHERE EXISTS " +
                 "(SELECT 1 FROM PHIEUDKDAY PD JOIN LICHDAY LD ON LD.MALICHDAY = DK.MALICHDAY " +
-                "WHERE PD.MAPHIEUDKDAY = DK.MAPHIEUDKDAY AND TRIM(PD.MAGV) = TRIM(?) AND LD.THU = ?)"; // khong duoc co ;  cuoi
+                "WHERE PD.MAPHIEUDKDAY = DK.MAPHIEUDKDAY AND TRIM(PD.MAGV) = TRIM(?) AND LD.THU = ?)";
         try(Connection conn = dataSource.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, maGV);
