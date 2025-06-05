@@ -157,4 +157,145 @@ public class HPRepository {
         }
     }
 
+    // thêm lớp học
+    public boolean addLopHoc(HPDTO lh) {
+        String checkSql = "SELECT COUNT(*) FROM LopHoc WHERE TRIM(MaLop) = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+
+            checkStmt.setString(1, lh.getMaLop());
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return false; // Đã tồn tại lớp học
+            }
+
+            String sql = "INSERT INTO LopHoc (MaLop, SiSo, ThuNgayHoc, NgayBatDau, NgayKetThuc, CachTuan, TietHoc, " +
+                    "NgonNguGiangDay, MaGV, MaMH, MaHK, PhongHoc, SoTinChi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, lh.getMaLop());
+                stmt.setInt(2, lh.getSiSo());
+                stmt.setInt(3, lh.getThuNgayHoc());
+                stmt.setDate(4, new java.sql.Date(lh.getNgayBatDau().getTime()));
+                stmt.setDate(5, new java.sql.Date(lh.getNgayKetThuc().getTime()));
+                stmt.setInt(6, lh.getCachTuan());
+                stmt.setString(7, lh.getTietHoc());
+                stmt.setString(8, lh.getNgonNguGiangDay());
+                stmt.setString(9, lh.getMaGV());
+                stmt.setString(10, lh.getMaMH());
+                stmt.setString(11, lh.getMaHK());
+                stmt.setString(12, lh.getPhongHoc());
+                stmt.setInt(13, lh.getSoTinChi());
+
+                return stmt.executeUpdate() > 0;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // xóa
+    public boolean deleteLopHoc(HPDTO lopHoc) {
+        String sql = "DELETE FROM LopHoc WHERE MaLop = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, lopHoc.getMaLop());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateLopHoc(HPDTO lh) {
+        String sql = "UPDATE LopHoc SET SiSo = ?, ThuNgayHoc = ?, NgayBatDau = ?, NgayKetThuc = ?, CachTuan = ?, TietHoc = ?, "
+                +
+                "NgonNguGiangDay = ?, MaGV = ?, MaMH = ?, MaHK = ?,  SoTinChi = ?, PhongHoc = ? WHERE MaLop = ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, lh.getSiSo());
+            stmt.setInt(2, lh.getThuNgayHoc());
+            stmt.setDate(3, new java.sql.Date(lh.getNgayBatDau().getTime()));
+            stmt.setDate(4, new java.sql.Date(lh.getNgayKetThuc().getTime()));
+            stmt.setInt(5, lh.getCachTuan());
+            stmt.setString(6, lh.getTietHoc());
+            stmt.setString(7, lh.getNgonNguGiangDay());
+            stmt.setString(8, lh.getMaGV());
+            stmt.setString(9, lh.getMaMH());
+            stmt.setString(10, lh.getMaHK());
+            stmt.setInt(11, lh.getSoTinChi());
+            stmt.setString(12, lh.getPhongHoc());
+            stmt.setString(13, lh.getMaLop());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // tìm lophoc
+    public HPDTO findLopHocById(String maLop) {
+        String sql = "SELECT * FROM LopHoc WHERE TRIM(MaLop) = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, maLop);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                HPDTO lh = new HPDTO();
+                lh.setMaLop(rs.getString("MaLop"));
+                lh.setSiSo(rs.getInt("SiSo"));
+                lh.setThuNgayHoc(rs.getInt("ThuNgayHoc"));
+                lh.setNgayBatDau(rs.getDate("NgayBatDau"));
+                lh.setNgayKetThuc(rs.getDate("NgayKetThuc"));
+                lh.setCachTuan(rs.getInt("CachTuan"));
+                lh.setTietHoc(rs.getString("TietHoc"));
+                lh.setNgonNguGiangDay(rs.getString("NgonNguGiangDay"));
+                lh.setMaGV(rs.getString("MaGV"));
+                lh.setMaMH(rs.getString("MaMH"));
+                lh.setMaHK(rs.getString("MaHK"));
+                lh.setPhongHoc(rs.getString("PhongHoc"));
+                lh.setSoTinChi(rs.getInt("SoTinChi"));
+                return lh;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // tìm kiếm xem trong danh sách lớp học
+    public List<HPDTO> searchLopHoc(String maLop, String tenMH, String tenHK, String namHoc) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("Search_Lop")
+                    .declareParameters(
+                            new SqlParameter("p_maLop", OracleTypes.VARCHAR),
+                            new SqlParameter("p_tenMH", OracleTypes.VARCHAR),
+                            new SqlParameter("p_tenHK", OracleTypes.VARCHAR),
+                            new SqlParameter("p_namHoc", OracleTypes.VARCHAR),
+                            new SqlOutParameter("p_cursor", OracleTypes.CURSOR, new HPDTORowMapper()));
+
+            Map<String, Object> inParams = new HashMap<>();
+            inParams.put("p_maLop", maLop == null ? "" : maLop);
+            inParams.put("p_tenMH", tenMH == null ? "" : tenMH);
+            inParams.put("p_tenHK", tenHK == null ? "" : tenHK);
+            inParams.put("p_namHoc", namHoc == null ? "" : namHoc);
+            Map<String, Object> result = jdbcCall.execute(inParams);
+            return (List<HPDTO>) result.get("p_cursor");
+
+        } catch (Exception e) {
+            System.err.println("Lỗi khi gọi procedure Search_HP: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
 }
