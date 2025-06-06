@@ -1,5 +1,5 @@
 // chartbar.js
-
+// khai báo biến toàn cục để giữ instance của biểu đồ
 // Biến toàn cục để giữ instance của biểu đồ, hữu ích nếu cần cập nhật mà không làm mới trang
 let studentsByMajorChartInstance = null;
 
@@ -9,10 +9,11 @@ let studentsByMajorChartInstance = null;
  * @param {string} apiUrl - URL của API backend để lấy dữ liệu.
  */
 async function renderBarChart(canvasId, apiUrl) {
-    const chartCanvas = document.getElementById(canvasId);
+    const chartCanvas = document.getElementById(canvasId);// Lấy phần tử canvas theo ID
     const canvasElement = document.getElementById('barChart');
 
-    if (!chartCanvas) {
+    if (!chartCanvas) { // Kiểm tra xem canvas có tồn tại không
+        // Nếu không tìm thấy canvas, hiển thị thông báo lỗi
         console.error(`Không tìm thấy canvas với ID '${canvasId}'`);
         // Có thể hiển thị thông báo lỗi ở một vị trí chung trên dashboard
         const errorContainer = document.getElementById('chartErrorMessages'); // Giả sử có một div với ID này
@@ -21,11 +22,12 @@ async function renderBarChart(canvasId, apiUrl) {
         }
         return;
     }
-    const ctx = chartCanvas.getContext('2d');
+    const ctx = chartCanvas.getContext('2d');// nếu tìm thấy canvas, dòng này lấy ngữ cảnh 2D của nó để vẽ biểu đồ
 
     try {
         const response = await fetch(apiUrl);
 
+        // Kiểm tra xem phản hồi có thành công không
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Lỗi HTTP: ${response.status} - ${errorText || response.statusText} (URL: ${apiUrl})`);
