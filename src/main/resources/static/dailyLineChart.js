@@ -2,9 +2,9 @@
  * Hàm fetch dữ liệu và vẽ biểu đồ đường cho lượt đăng ký theo ngày.
  * Dùng được chung cho các biểu đồ tương tự (giờ, tuần, tháng).
  */
-async function renderLineChart({ canvasId, apiUrl, chartLabel, xAxisLabel, yAxisLabel,  reverseData = false  }) {
-    const canvasElement = document.getElementById(canvasId);
-    const errorDiv = document.getElementById('chartErrorMessages');
+async function renderLineChart({ canvasId, apiUrl, chartLabel, xAxisLabel, yAxisLabel, reverseData = false }) { //khai báo 1 hàm bất đồng bộ (async) để lấy dữ liệu và vẽ biểu đồ
+    const canvasElement = document.getElementById(canvasId); //lấy canvas bằng cách sử dụng ID của nó
+    const errorDiv = document.getElementById('chartErrorMessages');// lấy phần tử hiển thị lỗi nếu có, để hiển thị thông báo lỗi nếu cần
 
     if (!canvasElement) {
         console.error(`Không tìm thấy canvas với ID "${canvasId}"`);
@@ -12,17 +12,19 @@ async function renderLineChart({ canvasId, apiUrl, chartLabel, xAxisLabel, yAxis
         return;
     }
 
-    const ctx = canvasElement.getContext('2d');
+    const ctx = canvasElement.getContext('2d');// lấy context vẽ 2d của canvascanvas
 
+    //xử lý lỗi 
     try {
         const response = await fetch(apiUrl);
 
-        if (!response.ok) {
+        if (!response.ok) {// kiểm tra xem phản hồi có thành công không
+            // Nếu không thành công, hiển thị thông báo lỗi
             let errorMessage = `Lỗi API: ${response.status} ${response.statusText}`;
             try {
                 const errorData = await response.json();
                 errorMessage += ` - ${errorData.message || errorData.body || JSON.stringify(errorData)}`;
-            } catch (_) {}
+            } catch (_) { }
             console.error(errorMessage);
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             ctx.font = "16px Arial"; ctx.fillStyle = "red";
@@ -32,19 +34,17 @@ async function renderLineChart({ canvasId, apiUrl, chartLabel, xAxisLabel, yAxis
         }
 
         const chartServerData = await response.json();
-       // chartServerData.labels.reverse(); // Đảo ngược thứ tự ngày
-        //chartServerData.data.reverse();   // Đảo ngược số lượt đăng ký
-            if (reverseData) {
-            chartServerData.labels.reverse();
-            chartServerData.data.reverse();
+        if (reverseData) {
+            chartServerData.labels.reverse();// Đảo ngược thứ tự ngày
+            chartServerData.data.reverse();// Đảo ngược số lượt đăng ký
         }
 
-// ➕ Thêm dòng xử lý định dạng nhãn trục X
-chartServerData.labels = chartServerData.labels.map(label => {
-    const [date] = label.split(' ');
-    const [year, month, day] = date.split('-');
-    return `${day}/${month}/${year}`;
-});
+        // ➕ Thêm dòng xử lý định dạng nhãn trục X
+        chartServerData.labels = chartServerData.labels.map(label => {// tạo 1 mảng labels mới từ mảng labels của dữ liệu trả về từ API
+            const [date] = label.split(' ');
+            const [year, month, day] = date.split('-');
+            return `${day}/${month}/${year}`;
+        });
 
         if (!chartServerData.labels || !chartServerData.data) {
             console.error("Dữ liệu từ API không hợp lệ:", chartServerData);
@@ -55,9 +55,10 @@ chartServerData.labels = chartServerData.labels.map(label => {
         }
 
         if (canvasElement.chartInstance) {
-            canvasElement.chartInstance.destroy();
+            canvasElement.chartInstance.destroy();// Nếu biểu đồ đã tồn tại, hủy nó trước khi tạo mới
         }
 
+        // Tạo biểu đồ mới
         canvasElement.chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -82,7 +83,7 @@ chartServerData.labels = chartServerData.labels.map(label => {
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: true,// Bắt đầu trục Y từ 0
                         title: {
                             display: true,
                             text: yAxisLabel
@@ -98,21 +99,22 @@ chartServerData.labels = chartServerData.labels.map(label => {
                             maxRotation: 45,
                             minRotation: 0,
                             font: { size: 10 },
-                            callback: function(value, index, ticks) {
-                                                // Giả sử bạn dùng kiểu thời gian dạng ISO 8601 như "2024-10-10 00:00:00"
-                                                const label = this.getLabelForValue(value);
-                                                return label.split(' ')[0]; // Lấy phần trước dấu cách (yyyy-mm-dd)
-                        },
-                        title: {
-                            display: true,
-                            text: xAxisLabel
+                            callback: function (value, index, ticks) {
+                                // Giả sử bạn dùng kiểu thời gian dạng ISO 8601 như "2024-10-10 00:00:00"
+                                const label = this.getLabelForValue(value);
+                                return label.split(' ')[0]; // Lấy phần trước dấu cách (yyyy-mm-dd)
+                            },
+                            title: {
+                                display: true,
+                                text: xAxisLabel
+                            }
                         }
                     }
                 },
                 plugins: {
                     legend: {
-                        display: true,
-                        position: 'top',
+                        display: true,// Hiển thị chú giải
+                        position: 'top',//đặt chú giải ở trên cùng
                         labels: { font: { size: 12 } }
                     },
                     tooltip: {
