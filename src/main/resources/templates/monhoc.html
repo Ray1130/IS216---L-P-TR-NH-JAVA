@@ -295,6 +295,7 @@
       padding-top: 20px;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
       position: fixed;
+      /* Giữ sidebar cố định khi cuộn trang */
       top: 0;
       left: 0;
       overflow-y: auto;
@@ -320,6 +321,7 @@
       color: #ecf0f1;
       text-decoration: none;
       transition: background-color 0.3s ease, color 0.3s ease;
+      /* Hiệu ứng chuyển động khi hover */
       font-size: 16px;
       font-weight: bold;
     }
@@ -385,10 +387,12 @@
 
 
     .dropdown-arrow {
+      /* Mũi tên dropdown */
       margin-left: auto;
       display: flex;
       align-items: center;
       transition: transform 0.3s ease;
+      /* Hiệu ứng xoay khi mở/đóng */
       color: #bdc3c7;
     }
 
@@ -630,23 +634,23 @@
 
       submenuParents.forEach(parentLink => {
         parentLink.addEventListener('click', function (event) {
-          event.preventDefault();
+          event.preventDefault();// Ngăn chặn hành động mặc định của liên kết
           const parentMenuItem = this.closest('.menu-item');
           parentMenuItem.classList.toggle('active');
 
-          const submenu = parentMenuItem.querySelector('.submenu');
+          const submenu = parentMenuItem.querySelector('.submenu');// Tìm submenu con
           if (submenu) {
-            if (parentMenuItem.classList.contains('active')) {
+            if (parentMenuItem.classList.contains('active')) {// Thêm hoặc bỏ class active để xoay mũi tên
               submenu.style.display = 'block';
-              submenu.style.maxHeight = submenu.scrollHeight + 'px';
-              submenu.style.opacity = '1';
+              submenu.style.maxHeight = submenu.scrollHeight + 'px';// Đặt chiều cao tối đa bằng chiều cao thực tế của nội dung
+              submenu.style.opacity = '1';//tăng độ trong suốt lên 11
             } else {
               submenu.style.maxHeight = '0';
               submenu.style.opacity = '0';
-              // Sau khi hiệu ứng chuyển đổi hoàn tất, ẩn hẳn submenu
+
               setTimeout(() => {
                 submenu.style.display = 'none';
-              }, 300);
+              }, 300); // Thời gian này nên khớp với 'transition' trong CSS của .submenu
             }
           }
         });
