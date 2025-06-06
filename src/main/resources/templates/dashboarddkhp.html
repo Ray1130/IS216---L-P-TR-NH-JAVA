@@ -299,17 +299,19 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('nav.menu a.tab-btn');
+            const currentPath = window.location.pathname;// Lấy đường dẫn hiện tại của trang
+            const navLinks = document.querySelectorAll('nav.menu a.tab-btn');// Lấy tất cả các liên kết trong menu
 
-            navLinks.forEach(link => {
+            navLinks.forEach(link => {// lặp qua từng đường link, thực hiện các bước kiểm tra và xử lý bên trong
                 // Lấy href một cách an toàn
-                const linkHref = link.getAttribute('href') || (link.getAttribute('th:href') ? link.getAttribute('th:href').replace('@{', '').replace('}', '') : null);
+                const linkHref = link.getAttribute('href') || (link.getAttribute('th:href') ? link.getAttribute('th:href').replace('@{', '').replace('}', '') : null);//biến linkHref sẽ chứa đường dẫn mà liên kết menu đó trỏ tới, bất kể nó được định nghĩa bằng href hay th:href
 
+
+                // Kiểm tra xem đường dẫn hiện tại có chứa đường dẫn của liên kết không
                 if (linkHref && currentPath.includes(linkHref)) {
-                    link.classList.add('active-tab');
+                    link.classList.add('active-tab');// Nếu có, thêm class active-tab để đánh dấu liên kết là đang hoạt động
                 } else {
-                    link.classList.remove('active-tab');
+                    link.classList.remove('active-tab');// Nếu không, đảm bảo loại bỏ class active-tab nếu nó đã được thêm trước đó
                 }
             });
         });
