@@ -26,9 +26,11 @@
             padding-top: 20px;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
             position: fixed;
+            /* Giữ sidebar cố định khi cuộn trang */
             top: 0;
             left: 0;
             overflow-y: auto;
+            /* Thêm thanh cuộn dọc nếu nội dung sidebar quá dài */
         }
 
         .sidebar ul {
@@ -39,6 +41,7 @@
 
         .sidebar li {
             margin-bottom: 5px;
+            /* Khoảng cách giữa các mục menu */
         }
 
         .sidebar a {
@@ -48,6 +51,7 @@
             color: #ecf0f1;
             text-decoration: none;
             transition: background-color 0.3s ease, color 0.3s ease;
+            /* Hiệu ứng chuyển động khi hover */
             font-size: 16px;
             font-weight: bold;
         }
@@ -60,6 +64,7 @@
         .sidebar .fas,
         .sidebar .fa-solid {
             margin-right: 12px;
+            /* Khoảng cách bên phải của icon */
             font-size: 18px;
             color: #eeeff3;
         }
@@ -97,6 +102,7 @@
             position: absolute;
             left: 30px;
             top: 50%;
+            /* Căn giữa theo chiều dọc */
             transform: translateY(-50%);
             height: 15px;
             width: 2px;
@@ -105,19 +111,23 @@
         }
 
         .dropdown-arrow {
+            /* Mũi tên dropdown */
             margin-left: auto;
             display: flex;
             align-items: center;
             transition: transform 0.3s ease;
+            /* Hiệu ứng xoay khi mở/đóng */
             color: #bdc3c7;
         }
 
         .sidebar .menu-item .parent-link .dropdown-arrow i {
             font-size: 10px !important;
+            /* Đặt kích thước mũi tên*/
         }
 
         .has-submenu.active .dropdown-arrow {
             transform: rotate(90deg);
+            /* Xoay mũi tên 90 độ khi submenu đang mở */
         }
 
         .has-submenu.active>.parent-link {
@@ -127,12 +137,14 @@
 
         .content-wrapper {
             flex-grow: 1;
+            /* Cho phép nội dung chính chiếm hết không gian còn lại */
             margin-left: 250px;
             display: flex;
             flex-direction: column;
             padding: 20px;
             box-sizing: border-box;
             overflow-x: hidden;
+            /* Ẩn thanh cuộn ngang nếu có */
         }
 
         .main {
@@ -145,6 +157,7 @@
             padding: 45px 15px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+            /* Chia thành 3 cột bằng nhau */
             grid-gap: 45px;
             padding-top: 10px;
             padding-bottom: 10px;
@@ -155,6 +168,7 @@
             padding: 12px 20px;
             display: flex;
             align-items: center;
+            /* Căn giữa theo chiều dọc */
             justify-content: space-between;
             background: white;
             border-radius: 10px;
@@ -163,6 +177,7 @@
 
         .card i {
             font-size: 1.75em;
+            /* Kích thước icon trong card */
             color: #0e4572;
         }
 
@@ -180,6 +195,7 @@
         .charts {
             display: grid;
             grid-template-columns: 2fr 1fr;
+            /* Chia thành 2 cột với tỷ lệ 2 phần và 1 phần */
             grid-template-rows: auto auto;
             grid-gap: 20px;
             width: 100%;
@@ -484,22 +500,22 @@
             const submenuParents = document.querySelectorAll('.has-submenu .parent-link');
             submenuParents.forEach(function (parentLink) {
                 parentLink.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    const parentLi = this.closest('.has-submenu');
-                    const submenu = parentLi.querySelector('.submenu');
-                    parentLi.classList.toggle('active');
+                    event.preventDefault();// Ngăn chặn hành động mặc định của liên kết
+                    const parentLi = this.closest('.has-submenu');// Tìm phần tử <li> cha
+                    const submenu = parentLi.querySelector('.submenu');// Tìm submenu con
+                    parentLi.classList.toggle('active');// Thêm hoặc bỏ class active để xoay mũi tên
 
                     if (submenu.style.display === 'block') {
                         submenu.style.maxHeight = '0';
                         submenu.style.opacity = '0';
                         setTimeout(() => {
-                            submenu.style.display = 'none';
+                            submenu.style.display = 'none';// Ẩn submenu sau khi hiệu ứng hoàn tất
                         }, 300);
                     } else {
                         submenu.style.display = 'block';
                         requestAnimationFrame(() => {
-                            submenu.style.maxHeight = submenu.scrollHeight + 'px';
-                            submenu.style.opacity = '1';
+                            submenu.style.maxHeight = submenu.scrollHeight + 'px';// Đặt chiều cao tối đa bằng chiều cao thực tế của nội dung
+                            submenu.style.opacity = '1';//tăng độ trong suốt lên 11
                         });
                     }
                 });
@@ -508,7 +524,7 @@
             const errorDiv = document.getElementById('chartErrorMessages');
 
             // Gọi biểu đồ lượt đăng ký theo ngày và theo giờ khi tải trang
-            if (typeof renderLineChart === 'function') {
+            if (typeof renderLineChart === 'function') {// Kiểm tra xem hàm renderLineChart có tồn tại không
                 renderLineChart({
                     canvasId: 'dailyLineChart',
                     apiUrl: '/admin/chart-data/luotdangkyngay',
@@ -516,7 +532,7 @@
                     xAxisLabel: 'Ngày',
                     yAxisLabel: 'Số lượt',
 
-                    reverseData: true
+                    reverseData: true// Đảo ngược dữ liệu nếu cần
                 });
 
 
@@ -526,7 +542,7 @@
                     chartLabel: 'Lượt đăng ký theo giờ',
                     xAxisLabel: 'Giờ',
                     yAxisLabel: 'Số lượt',
-                    processTimeLabels: true,
+                    processTimeLabels: true,// Xử lý nhãn giờ nếu cần
                     reverseData: true
                 });
             } else {
@@ -541,8 +557,8 @@
 
             // Khi load lần đầu
             if (typeof renderBarChart === 'function') {
-                const monHoc = document.getElementById("monHoc")?.value || "";
-                const hocKy = document.getElementById("hocKy")?.value || "";
+                const monHoc = document.getElementById("monHoc")?.value || "";// Lấy giá trị môn học hiện tại
+                const hocKy = document.getElementById("hocKy")?.value || "";// Lấy giá trị học kỳ hiện tại
                 const apiUrl = `/admin/chart-data/phansinhvientheonganh?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
                 renderBarChart('barChart', apiUrl);
             }
@@ -558,10 +574,10 @@
                 const apiDaily = `/admin/chart-data/luotdangkyngay?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
                 const apiHourly = `/admin/chart-data/luotdangkygio?monHoc=${encodeURIComponent(monHoc)}&hocKy=${encodeURIComponent(hocKy)}`;
 
-                console.log("Gửi API: ", apiDaily, apiHourly, apiBar);
+                console.log("Gửi API: ", apiDaily, apiHourly, apiBar);//log các URL API để kiểm tra
 
                 if (typeof renderBarChart === 'function') {
-                    renderBarChart('barChart', apiBar);
+                    renderBarChart('barChart', apiBar);//cập nhật biểu đò barChart
                 } else {
                     console.error("Hàm renderBarChart không được định nghĩa. Kiểm tra file BarChart.js.");
                     if (errorDiv) {
@@ -570,7 +586,7 @@
                 }
 
                 if (typeof renderLineChart === 'function') {
-                    renderLineChart({
+                    renderLineChart({// Cập nhật biểu đồ lượt đăng ký theo ngày
                         canvasId: 'dailyLineChart',
                         apiUrl: apiDaily,
                         chartLabel: 'Lượt đăng ký theo ngày',
@@ -580,7 +596,7 @@
                         reverseData: true
                     });
 
-                    renderLineChart({
+                    renderLineChart({// Cập nhật biểu đồ lượt đăng ký theo giờ
                         canvasId: 'hourlyLineChart',
                         apiUrl: apiHourly,
                         chartLabel: 'Lượt đăng ký theo giờ',
