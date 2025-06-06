@@ -7,9 +7,10 @@
  * @param {string} config.xAxisLabel - Nhãn trục X (ví dụ: "Giờ").
  * @param {string} config.yAxisLabel - Nhãn trục Y (ví dụ: "Số lượt").
  */
+// khai báo hàm bất đồng bộ để lấy dữ liệu và vẽ biểu đồ
 async function renderLineChart(config) {
-    const { canvasId, apiUrl, chartLabel, xAxisLabel, yAxisLabel, processTimeLabels = false,  reverseData = false } = config;
-    const canvasElement = document.getElementById(canvasId);
+    const { canvasId, apiUrl, chartLabel, xAxisLabel, yAxisLabel, processTimeLabels = false, reverseData = false } = config;
+    const canvasElement = document.getElementById(canvasId);// lấy phần tử canvas bằng ID
     const errorDiv = document.getElementById('chartErrorMessages');
 
     if (!canvasElement) {
@@ -18,18 +19,19 @@ async function renderLineChart(config) {
         return;
     }
 
+    // Lấy context vẽ 2D của canvas
     const ctx = canvasElement.getContext('2d');
 
     try {
-        console.log(`Đang fetch dữ liệu cho ${canvasId} từ ${apiUrl}`);
-        const response = await fetch(apiUrl);
+        console.log(`Đang fetch dữ liệu cho ${canvasId} từ ${apiUrl}`);// In ra log để theo dõi quá trình fetch dữ liệu
+        const response = await fetch(apiUrl);// Gọi API để lấy dữ liệu biểu đồ
 
         if (!response.ok) {
             let errorMessage = `Lỗi API (${apiUrl}) cho ${canvasId}: ${response.status} ${response.statusText}`;
             try {
                 const errorData = await response.json();
                 errorMessage += ` - ${errorData.body || errorData.message || JSON.stringify(errorData)}`;
-            } catch (e) {}
+            } catch (e) { }
             console.error(errorMessage);
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             ctx.font = "16px Arial";
@@ -39,8 +41,8 @@ async function renderLineChart(config) {
             return;
         }
 
-        const chartServerData = await response.json();
-         if (processTimeLabels) { // Chỉ xử lý nếu cờ là true
+        const chartServerData = await response.json();// nếu phản hồi thành công, chuyển đổi dữ liệu JSON từ API
+        if (processTimeLabels) { // Chỉ xử lý nếu cờ là true
             if (chartServerData.labels && Array.isArray(chartServerData.labels)) {
                 chartServerData.labels = chartServerData.labels.map(datetime => {
                     if (typeof datetime === 'string' && datetime.includes(" ")) {
@@ -51,15 +53,13 @@ async function renderLineChart(config) {
             }
         }
         if (reverseData) {
-            chartServerData.labels.reverse();
-            chartServerData.data.reverse();
+            chartServerData.labels.reverse();// Đảo ngược thứ tự giờ
+            chartServerData.data.reverse();// Đảo ngược số lượt đăng ký
         }
 
 
-      //  chartServerData.labels.reverse(); // Đảo ngược thứ tự giờ
-        //chartServerData.data.reverse();   // Đảo ngược số lượt đăng ký
-
         if (!chartServerData || !chartServerData.labels || !chartServerData.data) {
+            // Nếu dữ liệu không đúng định dạng, hiển thị thông báo lỗi
             const errorMsg = `Lỗi: Dữ liệu từ API ${apiUrl} cho ${canvasId} không đúng định dạng (thiếu "labels" hoặc "data").`;
             console.error(errorMsg, chartServerData);
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -71,9 +71,10 @@ async function renderLineChart(config) {
         }
 
         if (canvasElement.chartInstance) {
-            canvasElement.chartInstance.destroy();
+            canvasElement.chartInstance.destroy();// Nếu biểu đồ đã tồn tại, hủy nó trước khi tạo mới
         }
 
+        // Tạo biểu đồ mới
         canvasElement.chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
