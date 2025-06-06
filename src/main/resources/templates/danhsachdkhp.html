@@ -456,12 +456,12 @@
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const rows = document.querySelectorAll(".siso");
+            const rows = document.querySelectorAll(".siso");// Lấy tất cả phần tử trên trang có class là sĩ sốsố
 
-            rows.forEach(row => {
+            rows.forEach(row => {// Duyệt qua từng hàng
                 const maLop = row.getAttribute("data-ma-lop");
                 fetch(`/DKHP/${maLop}/siso`)
-                    .then(response => response.json())
+                    .then(response => response.json())//khi máy chủ phản hồi, nó sẽ chuyển đổi phản hồi từ JSON sang đối tượng JavaScript
                     .then(data => {
                         const siSoToiDa = row.textContent.split("/")[1].trim(); // Lấy sĩ số tối đa từ Thymeleaf
                         row.textContent = `${data} / ${siSoToiDa}`; // Cập nhật số sinh viên đăng ký
@@ -473,13 +473,13 @@
             });
         });
         document.addEventListener('DOMContentLoaded', function () {
-            const trigger = document.getElementById('userInfoTrigger');
+            const trigger = document.getElementById('userInfoTrigger');//lấy phần tử có id là userInfoTrigger
             const dropdownMenu = document.getElementById('userDropdownContent');
 
-            if (trigger && dropdownMenu) {
+            if (trigger && dropdownMenu) {// Kiểm tra nếu phần tử tồn tại
                 trigger.addEventListener('click', function (event) {
                     // Ngăn sự kiện click lan ra ngoài, nếu trigger nằm trong phần tử có thể click khác
-                    event.stopPropagation();
+                    event.stopPropagation();// Ngăn chặn sự kiện click lan ra ngoài
                     // Toggle hiển thị menu
                     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
                 });
@@ -491,8 +491,8 @@
                     }
                 });
                 document.addEventListener('keydown', function (event) {
-                    if (event.key === 'Escape' && dropdownMenu.style.display === 'block') {
-                        dropdownMenu.style.display = 'none';
+                    if (event.key === 'Escape' && dropdownMenu.style.display === 'block') {// Kiểm tra nếu phím Escape được nhấn
+                        dropdownMenu.style.display = 'none';// Đóng menu nếu đang mở
                     }
                 });
             }
