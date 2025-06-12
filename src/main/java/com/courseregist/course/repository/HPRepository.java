@@ -298,4 +298,43 @@ public class HPRepository {
         }
     }
 
+    // Tìm kiếm danh sách lớp học của giảng viên đã được phân công
+    public List<HPDTO> getDanhSachHocPhanOfGV(String maGV) {
+        SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("DanhSach_LopHoc_GiangVien")
+                .declareParameters(
+                        new SqlOutParameter("p_cursor", OracleTypes.CURSOR, new HPDTORowMapper()),
+                        new SqlParameter("p_maGV", OracleTypes.VARCHAR));
+
+        Map<String, Object> inParams = new HashMap<>();
+        inParams.put("p_maGV", maGV == null ? "" : maGV);
+        Map<String, Object> result = jdbcCall.execute(inParams);
+        return (List<HPDTO>) result.get("p_cursor");
+    }
+
+    // Tìm kiếm theo mã lớp, tên môn học của lớp mà giảng viên đã được phân công
+    public List<HPDTO> searchHPOfGV(String maLop, String tenMH, String maGV) {
+        try {
+            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+                    .withProcedureName("Search_HP_GiangVien")
+                    .declareParameters(
+                            new SqlParameter("p_maLop", OracleTypes.VARCHAR),
+                            new SqlParameter("p_tenMH", OracleTypes.VARCHAR),
+                            new SqlParameter("p_maGV", OracleTypes.VARCHAR),
+                            new SqlOutParameter("p_cursor", OracleTypes.CURSOR, new HPDTORowMapper()));
+
+            Map<String, Object> inParams = new HashMap<>();
+            inParams.put("p_maLop", maLop == null ? "" : maLop); 
+            inParams.put("p_tenMH", tenMH == null ? "" : tenMH);
+            inParams.put("p_maGV", maGV == null ? "" : maGV);
+            Map<String, Object> result = jdbcCall.execute(inParams);
+            return (List<HPDTO>) result.get("p_cursor");
+
+        } catch (Exception e) {
+            System.err.println("Lỗi khi gọi procedure Search_HP: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+    
 }
