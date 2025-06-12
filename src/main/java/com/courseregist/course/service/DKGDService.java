@@ -166,4 +166,23 @@ public class DKGDService {
         }
     }
 
+    public List<HPDTO> getDanhSachHocPhanOfGV(String maGV) {
+        return hpRepository.getDanhSachHocPhanOfGV(maGV);
+    }
+
+    public List<HPDTO> searchHPOfGV(String maLop, String tenMH, String maGV) {
+        // 1. Clean input
+        String maLopTrimmed = (maLop != null) ? maLop.trim() : "";
+        String tenMHTrimmed = (tenMH != null) ? tenMH.trim() : "";
+        String maGVTrimmed = (maGV != null) ? maGV.trim() : "";
+
+        // nếu không nhập gì thì vẫn ra dữ liệu bình thường
+        if (maLopTrimmed.isEmpty() && tenMHTrimmed.isEmpty()) {
+            // Assuming repository has a method to get all
+            return hpRepository.getDanhSachHocPhanOfGV(maGV);
+        }
+
+        return hpRepository.searchHPOfGV(maLopTrimmed, tenMHTrimmed, maGVTrimmed);
+    }
+
 }
