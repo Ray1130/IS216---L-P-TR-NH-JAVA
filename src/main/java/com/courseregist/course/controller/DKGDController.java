@@ -56,9 +56,7 @@ public class DKGDController {
 
     @PostMapping("/luuphieudangky")
     public String dangKyMonDay(Authentication authentication,
-                               //@RequestParam String maHK,
                                @RequestParam("selectedMon") List<String> maMHList,
-                               // RedirectAttributes dung de dieu huong + hien thong bao
                                RedirectAttributes redirectAttributes) {
         String maGV = authentication.getName() != null ? authentication.getName().trim() : null;
         String maHK = dkgdService.getMaHKMoiNhat();
@@ -134,8 +132,8 @@ public class DKGDController {
     public String showDanhSachDKGD(Model model, Authentication authentication) {
 
         String username = authentication.getName();
-        String maGVRaw = username; // Giữ lại giá trị gốc để log nếu cần
-        String maGV = maGVRaw != null ? maGVRaw.trim() : null; // Trim khoảng trắng
+        String maGVRaw = username; 
+        String maGV = maGVRaw != null ? maGVRaw.trim() : null; 
         System.out.println("CONTROLLER - MaGV sẽ truyền vào service: " + maGV);
 
         List<MonHoc> danhSachMonHoc = dkgdService.getDanhSachMHDaDangKy(maGV);
@@ -191,4 +189,99 @@ public class DKGDController {
         return "redirect:/lecturer/danhsachdkgd";
     }
 
+    @GetMapping("/danhsachphancong")
+    public String showDanhSachPhanCong(Authentication authentication,
+                                       @RequestParam(name = "maLop", required = false) String maLop,
+                                       @RequestParam(name = "tenMH", required = false) String tenMH,
+                                       Model model) {
+        String maGV = authentication.getName() != null ? authentication.getName().trim() : null;
+        List<HPDTO> danhSach;
+        if ((maLop != null && !maLop.isEmpty()) || (tenMH != null && !tenMH.isEmpty())) {
+            danhSach = dkgdService.searchHPOfGV(maLop, tenMH, maGV);
+            model.addAttribute("isSearch", true); 
+        } else {
+            danhSach = dkgdService.getDanhSachHocPhanOfGV(maGV); 
+            model.addAttribute("isSearch", false);
+        }
+        System.out.println("Danh sách lớp học phần:");
+        danhSach.forEach(System.out::println);
+        model.addAttribute("lopHocList", danhSach);
+        return "danhsachphancong";
+    }
+
+    @GetMapping("/danhsachphancong/dssvOfGV/{maLop}")
+    public String getDanhSachSinhVien(@PathVariable String maLop, Model model) {
+        HPDTO hocPhanDetails = adminService.findLopHocById(maLop);
+        if (hocPhanDetails == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy lớp học với mã: " + maLop);
+            return "error_page";
+        }
+        model.addAttribute("hocPhan", hocPhanDetails); 
+
+        List<SinhVien> danhSachSinhVien;
+        try {
+            danhSachSinhVien = dkhpService.getSinhVienDangKy(maLop);
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách sinh viên.");
+            danhSachSinhVien = new ArrayList<>(); 
+        }
+        if (danhSachSinhVien.isEmpty()) {
+            System.out.println("Không có sinh viên nào đăng ký cho MaLop: " + maLop);
+            model.addAttribute("message", "Chưa có sinh viên nào đăng ký lớp học này.");
+        }
+        model.addAttribute("danhSachSinhVien", danhSachSinhVien);
+
+        return "dssvOfGV";
+    }
+
+    private static final String DSSV_EXPORT_SPREADSHEET_ID = "1t12JnroOISkKDAuLb6VAPSvuYYjI_vbNst7f3GEKogM";
+
+    private static final String DSSV_EXPORT_TARGET_SHEET_NAME = "ExportData";
+
+    @GetMapping("/export/lophoc/{maLop}")
+    public void exportSinhVienTheoLop(
+            @PathVariable String maLop,
+            HttpServletResponse response) {
+        try {
+
+            List<SinhVien> danhSachSV = dkhpService.getSinhVienDangKy(maLop);
+
+            List<Object> headers = Arrays.asList("STT", "MSSV", "Họ và tên"); 
+            List<List<Object>> dataForSheet = new ArrayList<>();
+            int stt = 1;
+            if (danhSachSV != null) {
+                for (SinhVien sv : danhSachSV) {
+                    dataForSheet.add(Arrays.asList(
+                            stt++,
+                            sv.getMaSV(),
+                            sv.getHoTen()
+
+                    ));
+                }
+            }
+
+            googleSheetService.prepareDataOnExportSheet(
+                    DSSV_EXPORT_SPREADSHEET_ID, 
+                    DSSV_EXPORT_TARGET_SHEET_NAME, 
+                    dataForSheet, 
+                    headers
+            );
+
+            String downloadFileName = "DSSV_" + maLop.replace(".", "_").replace("/", "_");
+            googleSheetService.downloadExportSheetAsExcel(
+                    DSSV_EXPORT_SPREADSHEET_ID,
+                    downloadFileName,
+                    response);
+
+        } catch (IOException e) {
+            System.err.println("Lỗi I/O khi xuất file cho mã lớp " + maLop + ": " + e.getMessage());
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (Exception e) { 
+            System.err.println("Lỗi không xác định khi xuất file cho mã lớp " + maLop + ": " + e.getMessage());
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }
