@@ -42,9 +42,25 @@
 
 ## SEMINAR
 <a name="seminar"></a>
-Seminar nhóm: ...
+Seminar nhóm: Đăng nhập bảo mặt bằng Spring Security
 
 
 ## ĐỒ ÁN MÔN HỌC
 <a name="doan"></a>
-Đồ án Nhóm: ...
+Đồ án Nhóm: Đăng ký học phần
+Hiện nay, hầu hết các trường đại học đều tổ chức phương thức đào tạo theo tín chỉ, 
+trong đó mỗi học phần được tổ chức theo từng lớp khác nhau. Sinh viên tích lũy đủ 
+tín chỉ theo quy định của ngành học sẽ được nhận chứng chỉ tốt nghiệp đại học. Vì 
+đó, quy trình đăng ký môn học qua các học kỳ là điều tất yếu trong hệ thống giáo dục 
+đại học.  
+Xuất phát từ nhu cầu thực tế, việc phát triển hệ thống đăng ký học phần trực tuyến 
+là cực kỳ cần thiết. Nền tảng này giúp sinh viên dễ dàng lựa chọn môn học và sắp xếp 
+thời khóa biểu theo nhu cầu cá nhân, đồng thời đảm bảo tính công bằng trong phân 
+bổ lớp học. Bên cạnh đó, hệ thống còn hỗ trợ nhà trường quản lý dữ liệu sinh viên 
+hiệu quả, cập nhật thông tin nhanh chóng và giảm áp lực hành chính. Việc xây dựng 
+một nền tảng đăng ký học phần trực tuyến không chỉ giúp số hóa quy trình quản lý 
+giáo dục mà còn hiện đại hóa môi trường học tập trong các trường đại học, tạo ra một 
+không gian học tập hiệu quả và thân thiện hơn cho sinh viên.  
+Đề tài nghiên cứu các quy trình đăng ký học phần cơ bản, bổ sung một số tính 
+năng, khía cạnh mới hơn liên quan tới hệ thống đăng ký học phần, cụ thể là hệ thống 
+đăng ký học phần Trường Đại học Công nghệ Thông tin - Đại học Quốc Gia Tp.HCM. 
