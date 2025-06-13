@@ -48,6 +48,7 @@ Seminar nhóm: Đăng nhập bảo mặt bằng Spring Security
 ## ĐỒ ÁN MÔN HỌC
 <a name="doan"></a>
 Đồ án Nhóm: Đăng ký học phần
+
 Hiện nay, hầu hết các trường đại học đều tổ chức phương thức đào tạo theo tín chỉ, 
 trong đó mỗi học phần được tổ chức theo từng lớp khác nhau. Sinh viên tích lũy đủ 
 tín chỉ theo quy định của ngành học sẽ được nhận chứng chỉ tốt nghiệp đại học. Vì 
